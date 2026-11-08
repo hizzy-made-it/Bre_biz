@@ -51,7 +51,7 @@ export function resetLoginFailures() {
 }
 export function passcodeMatches(candidate: unknown) {
   const configured = process.env.DEMO_ACCESS_CODE;
-  if (!configured || configured.length < 12) throw new Error("Set DEMO_ACCESS_CODE to a passcode of at least 12 characters before starting the server.");
+  if (!configured || configured.length < 8) throw new Error("Set DEMO_ACCESS_CODE to a passcode of at least 8 characters before starting the server.");
   if (typeof candidate !== "string" || candidate.length > 256) return false;
   const a = Buffer.from(candidate); const b = Buffer.from(configured);
   return a.length === b.length && timingSafeEqual(a, b);

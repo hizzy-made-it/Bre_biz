@@ -20,7 +20,7 @@ Create a Railway volume mounted at `/data` and configure these service variables
 
 - `DATABASE_PATH=/data/demo.sqlite`
 - `APP_ORIGIN=https://your-exact-public-hostname`
-- `DEMO_ACCESS_CODE=<long private passcode, at least 12 characters>`
+- `DEMO_ACCESS_CODE=<private passcode, at least 8 characters>`
 - `DEMO_SESSION_SECRET=<random secret, at least 32 bytes>`
 - `NEXT_TELEMETRY_DISABLED=1`
 
