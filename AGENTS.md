@@ -1,6 +1,6 @@
-# Breanna Events & Bar demo
+# Wander & Revel Event Services demo
 
-Approved scope: private event planning and mobile bartending concept demo, including a customer-facing sample food menu, owner menu editing, and event food planning; preserve all existing features, design, imagery and content. The business name is provisional. Do not invent business credentials, pricing, clients or completed events. No actual bookings, emails, payments or calendar actions.
+Approved scope: private event planning and mobile bartending concept demo, including a customer-facing sample food menu, owner menu editing, and event food planning; preserve all existing features, design, imagery and content. The business name and supplied logo are the confirmed brand identity. Do not invent business credentials, pricing, clients or completed events. No actual bookings, emails, payments or calendar actions.
 
 Stack: Next.js 16 standalone on Node.js 24, Railway Dockerfile, better-sqlite3 + Drizzle using one persistent SQLite volume at `/data`. Railway is configured for one replica and a health check at `/api/health`. Keep SQLite WAL and busy timeout, initialize existing schema idempotently, and retain user isolation/version CAS. Do not scale multiple app replicas against SQLite.
 

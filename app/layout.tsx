@@ -3,8 +3,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Breanna Events & Bar | A little magic. A lot of intention.",
-  description: "Explore an interactive event planning and mobile bartending concept, with booking, a personal event planner and an owner studio.",
+  title: "Wander & Revel Event Services | A little magic. A lot of intention.",
+  description: "Explore the Wander & Revel Event Services interactive concept demo for event planning and mobile bartending, with a sample booking flow, personal event planner and owner studio.",
   robots: { index: false, follow: false },
   icons: {
     icon: "/favicon.svg",

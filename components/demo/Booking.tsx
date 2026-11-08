@@ -106,7 +106,7 @@ export function Booking({ initialService, state, mutate, busy, ready, openPlanne
   const stepLabels = ["Service", "Event", "Contact", "Review"];
   return <div className="booking-shell">
     <aside className="booking-aside">
-      <p className="small-label">Breanna Events &amp; Bar</p>
+      <p className="small-label">Wander &amp; Revel Event Services</p>
       <h1>Let’s make room for a good time.</h1>
       <p>Share a few details to create a planning inquiry in this private demo workspace.</p>
       <div className="booking-note"><ShieldCheck size={19} aria-hidden="true" /><span>Demo only. This form does not reserve a date or send messages.</span></div>

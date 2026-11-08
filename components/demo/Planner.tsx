@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronDown, Clock3, Plus, Printer, Save, Trash2, Users, Wallet } from "lucide-react";
 import { FOOD_CATEGORIES } from "@/lib/food-menu";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { DemoState, Event, EventBudgetItem, EventFoodItem, EventTask, EventTimelineItem, FoodCategory, FoodMenuItem } from "@/lib/demo-types";
 
 type Tab = "Overview" | "Checklist" | "Timeline" | "Budget" | "Bar menu" | "Food menu";
@@ -237,7 +238,7 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
     </div>
 
     <article className="print-only printable-plan" aria-label={`Printable event plan: ${draft.title}`}>
-      <p className="small-label">Breanna Events &amp; Bar · Demo plan</p>
+      <header className="print-plan-header"><BrandLogo className="print-brand-logo" /><p className="small-label">Wander &amp; Revel Event Services · Demo plan</p></header>
       <h1>{draft.title}</h1>
       <p>This is a sample planning document. It is not a reservation or service order.</p>
       <section aria-labelledby="print-details-title">

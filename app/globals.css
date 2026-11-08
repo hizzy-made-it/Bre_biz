@@ -183,3 +183,20 @@
  .food-studio-layout{grid-template-columns:1fr;gap:22px}.food-studio .panel-heading{align-items:flex-start;flex-wrap:wrap}.food-studio-editor{padding:18px}.food-studio-editor .form-actions{flex-wrap:wrap}.food-studio-row{padding:14px}
 }
 @media print{.food-planner-category,.print-food-category{break-inside:avoid}}
+
+/* Wander & Revel supplied logo */
+.brand-logo-link{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;line-height:0}
+.brand-logo-image{display:block;width:150px;height:auto;max-width:100%;object-fit:contain;background:#fff}
+.site-header{height:120px}
+.site-header>.brand-logo-link{width:150px}
+.footer-top>.brand-logo-link{width:150px}
+.access-brand-row>.brand-logo-link{width:190px}
+.print-plan-header{display:flex;align-items:center;gap:22px;border-bottom:1px solid #d8cfc6;padding-bottom:12px;margin-bottom:18px}
+.print-brand-logo{width:120px}
+.print-plan-header .small-label{margin:0}
+@media(max-width:760px){.site-header{height:82px}.site-header>.brand-logo-link{width:112px}.brand-logo-image{width:100%}.footer-top>.brand-logo-link{width:140px}.access-brand-row>.brand-logo-link{width:155px}}
+@media(max-width:380px){.site-header>.brand-logo-link{width:98px}}
+html[data-theme="dark"] .site-header>.brand-logo-link .brand-logo-image,
+html[data-theme="dark"] .footer-top>.brand-logo-link .brand-logo-image,
+html[data-theme="dark"] .access-brand-row>.brand-logo-link .brand-logo-image{padding:5px;border-radius:3px}
+@media print{.print-plan-header{break-inside:avoid}.print-brand-logo{width:105px}}

@@ -110,7 +110,7 @@ function exportInquiries(inquiries: Inquiry[]) {
   const href = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = href;
-  link.download = "breanna-demo-inquiries.csv";
+  link.download = "wander-revel-demo-inquiries.csv";
   link.click();
   URL.revokeObjectURL(href);
 }

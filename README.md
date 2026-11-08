@@ -1,6 +1,6 @@
-# Breanna Events & Bar
+# Wander & Revel Event Services
 
-A private, interactive concept demo for event planning and mobile bartending. The name is provisional, the event imagery and content are illustrative, and the demo does not create real bookings or send messages.
+A private, interactive concept demo for Wander & Revel Event Services, covering event planning and mobile bartending. The supplied brand identity is used throughout; event imagery and content are illustrative, and the demo does not create real bookings or send messages.
 
 ## Demo walkthrough
 
@@ -65,4 +65,4 @@ After a production build, `npm run verify:demo` runs the API checks using a temp
 
 ## Production follow-up
 
-Before using for real clients, confirm actual brand/domain/service areas, package scope, approved imagery/copy, operational permissions and business details; define staff/client access roles; connect booking/calendar and notification providers; agree reservation and payment terms; complete production security, accessibility and browser/device acceptance checks. None of those integrations are represented as enabled by this demo.
+Before using for real clients, confirm the domain/service areas, package scope, approved imagery/copy, operational permissions and business details; define staff/client access roles; connect booking/calendar and notification providers; agree reservation and payment terms; complete production security, accessibility and browser/device acceptance checks. None of those integrations are represented as enabled by this demo.
