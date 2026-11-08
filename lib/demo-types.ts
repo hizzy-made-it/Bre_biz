@@ -8,6 +8,23 @@ export type EventBudgetItem = {
   actual: number;
 };
 
+export type FoodCategory = "Appetizers" | "Mains" | "Sides" | "Desserts";
+export type FoodMenuItem = {
+  id: string;
+  name: string;
+  description: string;
+  category: FoodCategory;
+  dietaryNotes: string;
+  published: boolean;
+};
+export type EventFoodItem = {
+  id: string;
+  menuItemId: string | null;
+  name: string;
+  category: FoodCategory;
+  notes: string;
+};
+
 export type Inquiry = {
   id: string;
   name: string;
@@ -37,6 +54,7 @@ export type Event = {
   tasks: EventTask[];
   timeline: EventTimelineItem[];
   budgetItems: EventBudgetItem[];
+  foods: EventFoodItem[];
 };
 
 export type Post = {
@@ -64,6 +82,7 @@ export type DemoState = {
   events: Event[];
   posts: Post[];
   highlights: Highlight[];
+  foodMenu: FoodMenuItem[];
 };
 
 export type DemoActionRequest = {

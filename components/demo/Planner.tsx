@@ -2,15 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronDown, Clock3, Plus, Printer, Save, Trash2, Users, Wallet } from "lucide-react";
-import type { DemoState, Event, EventBudgetItem, EventTask, EventTimelineItem } from "@/lib/demo-types";
+import { FOOD_CATEGORIES } from "@/lib/food-menu";
+import type { DemoState, Event, EventBudgetItem, EventFoodItem, EventTask, EventTimelineItem, FoodCategory, FoodMenuItem } from "@/lib/demo-types";
 
-type Tab = "Overview" | "Checklist" | "Timeline" | "Budget" | "Bar menu";
-const tabs: Tab[] = ["Overview", "Checklist", "Timeline", "Budget", "Bar menu"];
+type Tab = "Overview" | "Checklist" | "Timeline" | "Budget" | "Bar menu" | "Food menu";
+const tabs: Tab[] = ["Overview", "Checklist", "Timeline", "Budget", "Bar menu", "Food menu"];
 const clone = (event: Event): Event => JSON.parse(JSON.stringify(event)) as Event;
 const newId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `demo-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const currency = (value: number) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number.isFinite(value) ? value : 0);
 
-export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNotice, book }: {
+export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNotice, book, initialSection }: {
   state: DemoState;
   mutate: (action: string, payload: unknown) => Promise<DemoState>;
   busy: boolean;
@@ -19,11 +20,12 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
   onSelect: (id: string) => void;
   onNotice: (message: string) => void;
   book: () => void;
+  initialSection?: "Overview" | "Food menu";
 }) {
   const selectedEvent = state.events.find((event) => event.id === selectedId) ?? state.events[0];
   const [draft, setDraft] = useState<Event | null>(() => selectedEvent ? clone(selectedEvent) : null);
   const [savedSnapshot, setSavedSnapshot] = useState(() => selectedEvent ? JSON.stringify(selectedEvent) : "");
-  const [tab, setTab] = useState<Tab>("Overview");
+  const [tab, setTab] = useState<Tab>(initialSection ?? "Overview");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
@@ -31,6 +33,8 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
   const [timelineTime, setTimelineTime] = useState("17:00");
   const [budgetName, setBudgetName] = useState("");
   const [drinkName, setDrinkName] = useState("");
+  const [foodName, setFoodName] = useState("");
+  const [foodCategory, setFoodCategory] = useState<FoodCategory>(FOOD_CATEGORIES[0]);
   const dirty = !!draft && JSON.stringify(draft) !== savedSnapshot;
 
   // Adopt refreshed server data only after local work is clean; otherwise the draft remains intact.
@@ -46,6 +50,21 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
   const completedCount = draft?.tasks.filter((task) => task.done).length ?? 0;
   const estimated = useMemo(() => draft?.budgetItems.reduce((sum, item) => sum + (Number(item.estimated) || 0), 0) ?? 0, [draft?.budgetItems]);
   const actual = useMemo(() => draft?.budgetItems.reduce((sum, item) => sum + (Number(item.actual) || 0), 0) ?? 0, [draft?.budgetItems]);
+  const publishedFood = state.foodMenu.filter((item) => item.published);
+
+  function addCatalogFood(item: FoodMenuItem) {
+    if (!draft || draft.foods.length >= 100 || draft.foods.some((food) => food.menuItemId === item.id)) return;
+    const food: EventFoodItem = { id: newId(), menuItemId: item.id, name: item.name, category: item.category, notes: item.dietaryNotes ? `Dietary notes: ${item.dietaryNotes}` : "" };
+    edit((event) => ({ ...event, foods: [...event.foods, food] }));
+  }
+
+  function addCustomFood() {
+    const name = foodName.trim();
+    if (!name || !draft || draft.foods.length >= 100) return;
+    const food: EventFoodItem = { id: newId(), menuItemId: null, name, category: foodCategory, notes: "" };
+    edit((event) => ({ ...event, foods: [...event.foods, food] }));
+    setFoodName("");
+  }
 
   function edit(change: (event: Event) => Event) {
     setDraft((current) => current ? change(current) : current);
@@ -177,6 +196,36 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
           {draft.drinks.length ? <ul className="drink-list">{draft.drinks.map((drink, index) => <li key={`${index}-${drink}`}><span><span className="drink-dot" aria-hidden="true" />{drink}</span><button className="icon-button" type="button" aria-label={`Remove ${drink}`} onClick={() => edit((event) => ({ ...event, drinks: event.drinks.filter((_, itemIndex) => itemIndex !== index) }))}><Trash2 size={16} aria-hidden="true" /></button></li>)}</ul> : <div className="empty-state">Your menu is open. Add a first drink idea above.</div>}
           <div className="panel menu-reminder"><strong>Menu reminder</strong><p>Confirm ingredients, allergies, venue rules, licensing, and service details with the responsible professionals before an actual event.</p></div>
         </div>}
+
+        {tab === "Food menu" && <div className="planner-content">
+          <div className="panel-heading"><div><p className="small-label">Food ideas for this event</p><h2>Food menu</h2></div><span className="status-pill">Planning draft</span></div>
+          <p className="muted">Choose a sample dish or add one of your own. Adjust the details for this event.</p>
+          <div className="food-planner-add">
+            <label className="field"><span>Add from sample menu</span><select aria-label="Add a dish from the sample menu" value="" onChange={(event) => { const item = publishedFood.find((food) => food.id === event.target.value); if (item) addCatalogFood(item); }}>
+              <option value="">Choose a dish…</option>{publishedFood.map((item) => <option key={item.id} value={item.id} disabled={draft.foods.some((food) => food.menuItemId === item.id)}>{item.name} · {item.category}{draft.foods.some((food) => food.menuItemId === item.id) ? " (already added)" : ""}</option>)}
+            </select></label>
+            <form className="inline-add" onSubmit={(event) => { event.preventDefault(); addCustomFood(); }}>
+              <label className="field"><span>Custom dish name</span><input required maxLength={120} value={foodName} onChange={(event) => setFoodName(event.target.value)} placeholder="Add a dish idea" /></label>
+              <label className="field"><span>Category</span><select value={foodCategory} onChange={(event) => setFoodCategory(event.target.value as FoodCategory)}>{FOOD_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</select></label>
+              <button className="button secondary" type="submit" disabled={draft.foods.length >= 100}><Plus size={16} aria-hidden="true" /> Add custom dish</button>
+            </form>
+          </div>
+          {draft.foods.length ? <div className="food-planner-list">
+            {FOOD_CATEGORIES.map((category) => {
+              const foods = draft.foods.filter((item) => item.category === category);
+              if (!foods.length) return null;
+              return <section className="food-planner-category" key={category} aria-labelledby={`food-${category}`}><h3 id={`food-${category}`}>{category}</h3>
+                {foods.map((item) => <div className="food-planner-item" key={item.id}>
+                  <label className="field"><span>Dish name</span><input required maxLength={120} value={item.name} onChange={(event) => edit((current) => ({ ...current, foods: current.foods.map((food) => food.id === item.id ? { ...food, name: event.target.value } : food) }))} /></label>
+                  <label className="field"><span>Category</span><select value={item.category} onChange={(event) => edit((current) => ({ ...current, foods: current.foods.map((food) => food.id === item.id ? { ...food, category: event.target.value as FoodCategory } : food) }))}>{FOOD_CATEGORIES.map((value) => <option key={value}>{value}</option>)}</select></label>
+                  <label className="field"><span>Dietary notes or planning notes</span><textarea rows={2} maxLength={500} value={item.notes} onChange={(event) => edit((current) => ({ ...current, foods: current.foods.map((food) => food.id === item.id ? { ...food, notes: event.target.value } : food) }))} /></label>
+                  <button className="icon-button" type="button" aria-label={`Remove ${item.name || "dish"}`} onClick={() => edit((current) => ({ ...current, foods: current.foods.filter((food) => food.id !== item.id) }))}><Trash2 size={16} aria-hidden="true" /></button>
+                </div>)}
+              </section>;
+            })}
+            <p className="muted">{draft.foods.length} / 100 dishes in this event plan.</p>
+          </div> : <div className="empty-state">No food ideas yet. Choose a sample dish or add a custom idea above.</div>}
+        </div>}
       </div>
     </div>
 
@@ -215,6 +264,13 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
       <section aria-labelledby="print-drinks-title">
         <h2 id="print-drinks-title">Bar and drink menu</h2>
         {draft.drinks.length ? <ul>{draft.drinks.map((drink, index) => <li key={`${index}-${drink}`}>{drink}</li>)}</ul> : <p>No drink ideas added.</p>}
+      </section>
+      <section aria-labelledby="print-food-title">
+        <h2 id="print-food-title">Food menu ideas</h2>
+        {draft.foods.length ? FOOD_CATEGORIES.map((category) => {
+          const foods = draft.foods.filter((item) => item.category === category);
+          return foods.length ? <div key={category}><h3>{category}</h3><ul>{foods.map((item) => <li key={item.id}><strong>{item.name}</strong>{item.notes ? ` — ${item.notes}` : ""}</li>)}</ul></div> : null;
+        }) : <p>No food ideas added.</p>}
       </section>
     </article>
   </section>;

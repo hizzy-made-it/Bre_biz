@@ -1,4 +1,5 @@
 import type { DemoState } from "./demo-types";
+import { createFoodMenuSeed } from "./food-menu";
 
 /** A fresh, explicitly fictional workspace for a newly authenticated demo user. */
 export function createDemoSeed(now = new Date()): DemoState {
@@ -9,6 +10,7 @@ export function createDemoSeed(now = new Date()): DemoState {
     future.setUTCDate(future.getUTCDate() + offset);
     return future.toISOString().slice(0, 10);
   };
+  const foodMenu = createFoodMenuSeed();
 
   return {
     inquiries: [
@@ -90,6 +92,11 @@ export function createDemoSeed(now = new Date()): DemoState {
           { id: "budget-w-2", name: "Mixers, garnishes, and ice", estimated: 380, actual: 0 },
           { id: "budget-w-3", name: "Rentals and printed menus", estimated: 260, actual: 0 },
         ],
+        foods: [
+          { id: "event-food-w-1", menuItemId: "food-herbed-goat-cheese", name: "Herbed goat cheese crostini", category: "Appetizers", notes: "Pass during guest arrival." },
+          { id: "event-food-w-2", menuItemId: "food-lemon-chicken", name: "Lemon herb chicken", category: "Mains", notes: "Sample plated main." },
+          { id: "event-food-w-3", menuItemId: "food-berry-shortcake", name: "Berry shortcake cups", category: "Desserts", notes: "Serve after dinner." },
+        ],
       },
       {
         id: "event-demo-open-house",
@@ -112,6 +119,10 @@ export function createDemoSeed(now = new Date()): DemoState {
         budgetItems: [
           { id: "budget-o-1", name: "Non-alcoholic refreshments", estimated: 240, actual: 0 },
           { id: "budget-o-2", name: "Florals and welcome table", estimated: 320, actual: 0 },
+        ],
+        foods: [
+          { id: "event-food-o-1", menuItemId: "food-market-greens", name: "Market greens salad", category: "Sides", notes: "Set out at the welcome table." },
+          { id: "event-food-o-2", menuItemId: "food-chocolate-tart", name: "Dark chocolate tartlets", category: "Desserts", notes: "Sample bite-size dessert." },
         ],
       },
     ],
@@ -197,6 +208,7 @@ The goal is not to control the weather; it is to make a clear choice early enoug
         guests: 55,
       },
     ],
+    foodMenu,
   };
 }
 

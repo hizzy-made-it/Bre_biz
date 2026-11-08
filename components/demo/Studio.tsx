@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowLeft,
@@ -12,15 +12,20 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
+import { FOOD_CATEGORIES } from "@/lib/food-menu";
 import type {
   DemoState,
+  FoodCategory,
+  FoodMenuItem,
   Highlight,
   Inquiry,
   InquiryStatus,
   Post,
 } from "@/lib/demo-types";
 
-type StudioTab = "Overview" | "Inquiries" | "Journal" | "Highlights";
+type StudioTab = "Overview" | "Inquiries" | "Journal" | "Highlights" | "Food menu";
+type FoodDraft = Omit<FoodMenuItem, "id"> & { id?: string };
+type FoodSwitch = { kind: "tab"; value: StudioTab } | { kind: "item"; value: string | null } | { kind: "close"; value: null };
 type StudioProps = {
   state: DemoState;
   mutate: (action: string, payload: unknown) => Promise<DemoState>;
@@ -30,7 +35,7 @@ type StudioProps = {
   openPlanner: (id: string) => void;
 };
 
-const tabs: StudioTab[] = ["Overview", "Inquiries", "Journal", "Highlights"];
+const tabs: StudioTab[] = ["Overview", "Inquiries", "Journal", "Highlights", "Food menu"];
 const statuses: InquiryStatus[] = ["new", "contacted", "confirmed", "declined"];
 const images = [
   { path: "/images/celebration.webp", label: "Celebration" },
@@ -70,6 +75,10 @@ function blankHighlight(): Omit<Highlight, "id"> {
     image: "/images/celebration.webp",
     guests: 1,
   };
+}
+
+function blankFoodItem(): FoodDraft {
+  return { name: "", description: "", category: FOOD_CATEGORIES[0], dietaryNotes: "", published: false };
 }
 
 function csvCell(value: string | number) {
@@ -117,8 +126,90 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
   const [highlightDraft, setHighlightDraft] = useState<(Omit<Highlight, "id"> & { id?: string }) | null>(null);
   const [postError, setPostError] = useState("");
   const [highlightError, setHighlightError] = useState("");
+  const [foodDraft, setFoodDraft] = useState<FoodDraft | null>(null);
+  const [foodSavedSnapshot, setFoodSavedSnapshot] = useState("");
+  const [foodError, setFoodError] = useState("");
+  const [foodPendingSwitch, setFoodPendingSwitch] = useState<FoodSwitch | null>(null);
 
   const selectedInquiry = state.inquiries.find((item) => item.id === selectedInquiryId);
+  const foodDirty = !!foodDraft && JSON.stringify(foodDraft) !== foodSavedSnapshot;
+
+  useEffect(() => {
+    if (!foodDirty && foodDraft?.id) {
+      const current = state.foodMenu.find((item) => item.id === foodDraft.id);
+      if (current) { setFoodDraft({ ...current }); setFoodSavedSnapshot(JSON.stringify(current)); }
+    }
+  }, [state.foodMenu, foodDirty, foodDraft?.id]);
+
+  function startFoodItem(item: FoodMenuItem | null) {
+    const next = item ? { ...item } : blankFoodItem();
+    setFoodDraft(next);
+    setFoodSavedSnapshot(JSON.stringify(next));
+    setFoodError("");
+  }
+
+  function requestFoodSwitch(action: FoodSwitch) {
+    if (action.kind === "tab" && action.value === tab) return;
+    if (foodDraft && action.kind === "item" && (action.value === (foodDraft.id ?? null))) return;
+    if (tab === "Food menu" && foodDirty) setFoodPendingSwitch(action);
+    else applyFoodSwitch(action);
+  }
+
+  function applyFoodSwitch(action: FoodSwitch) {
+    if (action.kind === "tab") setTab(action.value);
+    else if (action.kind === "close") { setFoodDraft(null); setFoodSavedSnapshot(""); setFoodError(""); }
+    else startFoodItem(action.value ? state.foodMenu.find((item) => item.id === action.value) ?? null : null);
+    setFoodPendingSwitch(null);
+  }
+
+  async function saveFoodItem(): Promise<boolean> {
+    if (!foodDraft) return true;
+    setFoodError("");
+    try {
+      const previousIds = new Set(state.foodMenu.map((item) => item.id));
+      const result = await mutate("saveFoodMenuItem", foodDraft);
+      const saved = foodDraft.id
+        ? result.foodMenu.find((item) => item.id === foodDraft.id)
+        : result.foodMenu.find((item) => !previousIds.has(item.id));
+      if (!saved) throw new Error("The saved menu item was not returned. Reload the workspace before editing it again.");
+      setFoodDraft({ ...saved });
+      setFoodSavedSnapshot(JSON.stringify(saved));
+      onNotice(saved.published ? "Sample dish published." : "Sample dish draft saved.");
+      return true;
+    } catch (error) {
+      setFoodError(error instanceof Error ? error.message : "Could not save this menu item. Your edits are still here.");
+      return false;
+    }
+  }
+
+  async function finishFoodSwitch(saveFirst: boolean) {
+    const action = foodPendingSwitch;
+    if (!action) return;
+    if (saveFirst && !(await saveFoodItem())) return;
+    if (!saveFirst && action.kind === "close") {
+      setFoodDraft(null); setFoodSavedSnapshot(""); setFoodError("");
+    } else if (!saveFirst && action.kind === "item") {
+      const item = action.value ? state.foodMenu.find((value) => value.id === action.value) ?? null : null;
+      startFoodItem(item);
+    } else if (!saveFirst && action.kind === "tab") {
+      setFoodDraft(null); setFoodSavedSnapshot(""); setFoodError(""); setTab(action.value);
+    } else applyFoodSwitch(action);
+    setFoodPendingSwitch(null);
+  }
+
+  async function deleteFoodItem() {
+    if (!foodDraft?.id) return;
+    if (foodDirty) { setFoodError("Save or discard your edits before deleting this menu item."); return; }
+    if (!window.confirm("Delete this sample dish from the catalog? Saved event menus keep their dishes.")) return;
+    setFoodError("");
+    try {
+      await mutate("deleteFoodMenuItem", { id: foodDraft.id });
+      setFoodDraft(null); setFoodSavedSnapshot("");
+      onNotice("Sample dish deleted.");
+    } catch (error) {
+      setFoodError(error instanceof Error ? error.message : "Could not delete this menu item.");
+    }
+  }
 
   const filteredInquiries = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -217,7 +308,7 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
 
       <nav className="filter-tabs" aria-label="Studio sections">
         {tabs.map((item) => (
-          <button key={item} type="button" className={tab === item ? "active" : ""} aria-pressed={tab === item} onClick={() => setTab(item)}>
+          <button key={item} type="button" className={tab === item ? "active" : ""} aria-pressed={tab === item} onClick={() => requestFoodSwitch({ kind: "tab", value: item })}>
             {item}
           </button>
         ))}
@@ -266,6 +357,39 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
 
         {selectedInquiry && <InquiryDetails inquiry={selectedInquiry} statusDraft={statusDraft} setStatusDraft={setStatusDraft} error={inquiryError} busy={busy} ready={ready} onSave={saveInquiryStatus} openPlanner={openPlanner} />}
       </>}
+
+      {tab === "Food menu" && <section className="panel content-panel food-studio" aria-labelledby="food-studio-heading">
+        <div className="panel-heading"><div><span className="small-label">Customer-facing sample menu</span><h2 id="food-studio-heading">Food menu</h2></div><button type="button" className="button primary" onClick={() => requestFoodSwitch({ kind: "item", value: null })} disabled={!ready || busy || state.foodMenu.length >= 100}><Plus size={16} /> New dish</button></div>
+        <p className="muted">These entries appear as sample concepts on the site when published. Existing event plan selections remain saved as snapshots if a catalog dish is later changed or deleted.</p>
+        {foodPendingSwitch && <div className="panel unsaved-confirm" role="alertdialog" aria-labelledby="food-unsaved-title" aria-describedby="food-unsaved-desc">
+          <div><strong id="food-unsaved-title">Unsaved menu edits</strong><p id="food-unsaved-desc">Save your menu item before switching, discard these edits, or keep editing.</p></div>
+          <div className="form-actions"><button className="button primary" type="button" onClick={() => finishFoodSwitch(true)} disabled={busy || !ready}>Save and switch</button><button className="button secondary" type="button" onClick={() => finishFoodSwitch(false)} disabled={busy}>Discard edits</button><button className="text-link" type="button" onClick={() => setFoodPendingSwitch(null)}>Keep editing</button></div>
+        </div>}
+        <div className="food-studio-layout">
+          <div className="food-studio-list" aria-label="Food menu items">
+            {state.foodMenu.map((item) => <button key={item.id} type="button" className={`food-studio-row ${foodDraft?.id === item.id ? "selected" : ""}`} onClick={() => requestFoodSwitch({ kind: "item", value: item.id })}>
+              <span><strong>{item.name || "Untitled dish"}</strong><small>{item.category}</small></span><span className={`status-pill ${item.published ? "published" : "draft"}`}>{item.published ? "Published" : "Draft"}</span>
+            </button>)}
+            {!state.foodMenu.length && <div className="empty-state">No sample dishes yet. Add the first dish concept.</div>}
+          </div>
+          {foodDraft ? <div className="editor-panel food-studio-editor">
+            <div className="editor-heading"><div><span className="small-label">{foodDraft.id ? "Edit sample dish" : "New sample dish"}</span><h3>{foodDraft.name || "Untitled dish"}</h3></div><button className="icon-button" type="button" aria-label="Close food menu editor" onClick={() => requestFoodSwitch({ kind: "close", value: null })}>×</button></div>
+            <div className="form-grid">
+              <label className="field full-width"><span>Dish name</span><input required maxLength={120} value={foodDraft.name} onChange={(event) => setFoodDraft({ ...foodDraft, name: event.target.value })} /></label>
+              <label className="field"><span>Category</span><select value={foodDraft.category} onChange={(event) => setFoodDraft({ ...foodDraft, category: event.target.value as FoodCategory })}>{FOOD_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</select></label>
+              <label className="field full-width"><span>Description</span><textarea rows={4} maxLength={500} value={foodDraft.description} onChange={(event) => setFoodDraft({ ...foodDraft, description: event.target.value })} /></label>
+              <label className="field full-width"><span>Dietary notes</span><textarea rows={3} maxLength={300} value={foodDraft.dietaryNotes} onChange={(event) => setFoodDraft({ ...foodDraft, dietaryNotes: event.target.value })} /><small>Share neutral ingredient or dietary notes. Avoid certification claims.</small></label>
+              <label className="food-published-toggle"><input type="checkbox" checked={foodDraft.published} onChange={(event) => setFoodDraft({ ...foodDraft, published: event.target.checked })} /><span>Published on the sample menu</span></label>
+            </div>
+            {foodError && <div className="form-error" role="alert">{foodError}</div>}
+            <div className="form-actions">
+              {foodDraft.id && <button type="button" className="button danger" onClick={deleteFoodItem} disabled={busy}><Trash2 size={16} /> Delete</button>}
+              <button type="button" className="button secondary" onClick={() => requestFoodSwitch({ kind: "close", value: null })} disabled={busy}>Close editor</button>
+              <button type="button" className="button primary" onClick={saveFoodItem} disabled={busy || !ready || !foodDirty || !foodDraft.name.trim()}><Save size={16} /> Save menu item</button>
+            </div>
+          </div> : <div className="editor-panel editor-placeholder"><BookOpen aria-hidden="true" /><h3>Choose a dish</h3><p className="muted">Select a menu item to edit, or create a new sample dish.</p></div>}
+        </div>
+      </section>}
 
       {tab === "Journal" && <section className="panel content-panel" aria-labelledby="journal-heading">
         <div className="panel-heading"><div><span className="small-label">Editorial content</span><h2 id="journal-heading">Journal</h2></div><button type="button" className="button primary" onClick={() => { setPostError(""); setPostDraft(blankPost()); }} disabled={!ready || busy}><Plus size={16} /> New article</button></div>

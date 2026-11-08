@@ -3,15 +3,19 @@ import { getDb } from "../../../db";
 import { demoStates } from "../../../db/schema";
 import { getDemoUser, originAllowed } from "../../demo-auth";
 import { createDemoSeed } from "../../../lib/demo-seed";
+import { createFoodMenuSeed, FOOD_CATEGORIES } from "../../../lib/food-menu";
 import type {
   DemoActionRequest,
   DemoState,
   DemoStateResponse,
   Event,
   EventBudgetItem,
+  EventFoodItem,
   EventTask,
   EventTimelineItem,
   Highlight,
+  FoodCategory,
+  FoodMenuItem,
   Inquiry,
   InquiryStatus,
   Post,
@@ -179,6 +183,20 @@ function validateEvent(value: unknown): Event {
     };
   });
   const drinks = list<string>(value.drinks, "drinks", 100, (raw) => requiredString(raw, "drink", 120));
+  const foodIds = new Set<string>();
+  const foods = list<EventFoodItem>(value.foods, "foods", 100, (raw) => {
+    if (!isRecord(raw)) throw new ValidationError("each food selection must be an object");
+    const id = validId(raw.id, "food selection id");
+    if (foodIds.has(id)) throw new ValidationError("food selection ids must be unique");
+    foodIds.add(id);
+    return {
+      id,
+      menuItemId: raw.menuItemId === null ? null : validId(raw.menuItemId, "menu item id"),
+      name: requiredString(raw.name, "food selection name", 120),
+      category: oneOf(raw.category, FOOD_CATEGORIES, "food category") as FoodCategory,
+      notes: optionalString(raw.notes, "food selection notes", 500),
+    };
+  });
   return {
     id: validId(value.id, "event id"),
     title: requiredString(value.title, "event title", 160),
@@ -190,6 +208,20 @@ function validateEvent(value: unknown): Event {
     tasks,
     timeline,
     budgetItems,
+    foods,
+  };
+}
+
+function validateFoodMenuItem(value: unknown): Omit<FoodMenuItem, "id"> & { id?: string } {
+  if (!isRecord(value)) throw new ValidationError("food menu item must be an object");
+  if (typeof value.published !== "boolean") throw new ValidationError("published must be true or false");
+  return {
+    ...(value.id === undefined ? {} : { id: validId(value.id, "food menu item id") }),
+    name: requiredString(value.name, "food name", 120),
+    description: optionalString(value.description, "food description", 500),
+    category: oneOf(value.category, FOOD_CATEGORIES, "food category") as FoodCategory,
+    dietaryNotes: optionalString(value.dietaryNotes, "dietary notes", 300),
+    published: value.published,
   };
 }
 
@@ -246,6 +278,7 @@ function updateState(state: DemoState, request: DemoActionRequest): DemoState {
         ],
         timeline: [{ id: crypto.randomUUID(), time: input.time, title: "Event start" }],
         budgetItems: [],
+        foods: [],
       };
       const inquiry: Inquiry = {
         ...input,
@@ -267,9 +300,10 @@ function updateState(state: DemoState, request: DemoActionRequest): DemoState {
       return { ...state, inquiries: state.inquiries.map((item) => item.id === id ? { ...item, status } : item) };
     }
     case "updateEvent": {
-      const event = validateEvent(payload);
-      const previous = state.events.find((item) => item.id === event.id);
+      const previous = state.events.find((item) => item.id === payload.id);
       if (!previous) throw new ValidationError("event not found");
+      // Older open clients do not send the food field. Preserve the current snapshot.
+      const event = validateEvent({ ...payload, foods: payload.foods === undefined ? previous.foods : payload.foods });
       const linkedInquiries = state.inquiries.filter((item) => item.eventId === event.id);
       if (previous.date !== event.date && linkedInquiries.some((linked) =>
         linked.status !== "declined" && state.inquiries.some((other) =>
@@ -286,6 +320,22 @@ function updateState(state: DemoState, request: DemoActionRequest): DemoState {
           ? { ...item, date: event.date, location: event.venue, guests: event.guests }
           : item),
       };
+    }
+    case "saveFoodMenuItem": {
+      const input = validateFoodMenuItem(payload);
+      if (input.id) {
+        if (!state.foodMenu.some((item) => item.id === input.id)) throw new ValidationError("food menu item not found");
+        return { ...state, foodMenu: state.foodMenu.map((item) => item.id === input.id ? { ...input, id: input.id } : item) };
+      }
+      if (state.foodMenu.length >= 100) throw new ValidationError("food menu can contain at most 100 items");
+      const item: FoodMenuItem = { ...input, id: crypto.randomUUID() };
+      return { ...state, foodMenu: [...state.foodMenu, item] };
+    }
+    case "deleteFoodMenuItem": {
+      const id = validId(payload.id, "food menu item id");
+      if (!state.foodMenu.some((item) => item.id === id)) throw new ValidationError("food menu item not found");
+      // Events keep their own snapshots, including after catalog removal.
+      return { ...state, foodMenu: state.foodMenu.filter((item) => item.id !== id) };
     }
     case "savePost": {
       const input = validatePost(payload);
@@ -322,12 +372,33 @@ function responseFor(row: { state: string; version: number }): DemoStateResponse
     throw new Error("Stored demo state is invalid JSON");
   }
   if (!isDemoState(state)) throw new Error("Stored demo state has an invalid shape");
-  return { state, version: row.version };
+  return { state: normalizeState(state), version: row.version };
 }
 
 function isDemoState(value: unknown): value is DemoState {
   return isRecord(value) && Array.isArray(value.inquiries) && Array.isArray(value.events) &&
     Array.isArray(value.posts) && Array.isArray(value.highlights);
+}
+
+function normalizeState(value: Record<string, unknown>): DemoState {
+  const events = value.events as unknown[];
+  if (events.some((event) => !isRecord(event))) throw new Error("Stored demo events have an invalid shape");
+  if (value.foodMenu !== undefined && !Array.isArray(value.foodMenu)) throw new Error("Stored food menu has an invalid shape");
+  // Missing means a legacy workspace. An explicit [] is intentional and stays empty.
+  const rawMenu = value.foodMenu === undefined ? createFoodMenuSeed() : value.foodMenu;
+  if (rawMenu.length > 100) throw new Error("Stored food menu exceeds its item limit");
+  const seenMenuIds = new Set<string>();
+  const foodMenu = rawMenu.map((raw) => {
+    const parsed = validateFoodMenuItem(raw);
+    if (!parsed.id) throw new Error("Stored food menu item has no id");
+    if (seenMenuIds.has(parsed.id)) throw new Error("Stored food menu has duplicate ids");
+    seenMenuIds.add(parsed.id);
+    return { ...parsed, id: parsed.id };
+  });
+  const normalizedEvents = (events as Record<string, unknown>[]).map((event) =>
+    validateEvent({ ...event, foods: event.foods === undefined ? [] : event.foods }),
+  );
+  return { ...value, events: normalizedEvents, foodMenu } as DemoState;
 }
 
 async function getOrCreateUserState(userId: string) {

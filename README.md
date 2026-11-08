@@ -5,12 +5,21 @@ A private, interactive concept demo for event planning and mobile bartending. Th
 ## Demo walkthrough
 
 1. Open `/demo-access` and enter the owner-provided access code.
-2. Explore the home page, services, sample booking flow, event planner and owner studio.
-3. Add sample inquiries and edit planning, journal and gallery content. Each browser session receives its own isolated workspace.
+2. Explore the home page, services, food menu, sample booking flow, event planner and owner studio.
+3. Add sample inquiries and edit planning, food menu, journal and gallery content. Each browser session receives its own isolated workspace.
 
 The slideshow supports manual controls, pause and reduced motion. Forms validate inputs, mutations use optimistic version checks, and state is persisted in SQLite. No email, SMS, payment, external calendar or real reservation is triggered.
 
 The sun/moon button on the access page and site header switches between light and dark mode. The initial theme follows the device setting; a manual selection is saved in that browser. The planner's printed report stays light.
+
+## Food menu walkthrough
+
+- Open **Food menu** in the navigation to browse the sample appetizers, mains, sides and desserts. Only published dishes appear on this page.
+- In **Owner studio → Food menu**, add or edit dishes, descriptions, categories and dietary notes, and choose whether each dish is published. Changes belong to the current browser's demo workspace.
+- In **My event → Food menu**, choose a sample dish or add a custom idea. Adjust dish names, categories and event-specific notes, then choose **Save plan**. The printed event plan includes the food menu alongside the bar menu.
+- Saved event choices retain their own details when a menu dish is later edited or removed. Existing workspaces receive the new food fields without resetting their inquiries, plans or other content.
+
+All supplied dishes are fictional planning examples. They do not establish an actual catering offer, price, availability or dietary certification.
 
 ## Railway deployment
 
@@ -47,6 +56,8 @@ npm run dev -- --webpack --port 8877
 `DEMO_INSECURE_COOKIES=true` works only outside production and when `APP_ORIGIN` is loopback. Production always uses Secure cookies. For API verification, set the same `APP_ORIGIN`, `DEMO_ACCESS_CODE` and `DEMO_SESSION_SECRET` in another PowerShell window, then run `node scripts/verify-demo-api.mjs`. The integration script refuses non-loopback origins, performs a real code login, exercises the authenticated API, checks forged/tampered identity rejection and isolates two browser sessions. Its Node client carries the session cookie explicitly, so production Secure-cookie behavior can be tested over local HTTP without weakening that setting. Use a disposable DB path; the test writes synthetic QA content.
 
 `npx tsc --noEmit --pretty false` performs the TypeScript check. `npm run lint` runs ESLint.
+
+After a production build, `npm run verify:demo` runs the API checks using a temporary SQLite database, random local-only credentials and a loopback-only server. The runner stops its server and removes its temporary data on completion, with a two-minute overall deadline. It also checks food-menu editing, event choices, and compatibility with older saved workspaces.
 
 ## Project identity and assets
 
