@@ -22,10 +22,12 @@ export function isLoopbackOrigin(value: string) {
   try { const url = new URL(value); return url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname); } catch { return false; }
 }
 export function expectedOrigin() {
-  const value = process.env.APP_ORIGIN;
+  const railwayDomain = process.env.RAILWAY_PUBLIC_DOMAIN;
+  const value = process.env.APP_ORIGIN || (railwayDomain ? `https://${railwayDomain}` : undefined);
   if (!value) throw new Error("Set APP_ORIGIN to the exact public https origin (or loopback origin for local testing).");
   const url = new URL(value);
   if (url.origin !== value.replace(/\/$/, "")) throw new Error("APP_ORIGIN must contain only an origin, without a path or trailing slash.");
+  if (url.protocol !== "https:" && !isLoopbackOrigin(value)) throw new Error("APP_ORIGIN must use https, except for loopback origins used in local testing.");
   return url.origin;
 }
 export function originAllowed(request: Request, requireOrigin = true) {

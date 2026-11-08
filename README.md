@@ -19,10 +19,12 @@ This fork runs as a standard Node.js 24 Next.js standalone server. Railway build
 Create a Railway volume mounted at `/data` and configure these service variables:
 
 - `DATABASE_PATH=/data/demo.sqlite`
-- `APP_ORIGIN=https://your-exact-public-hostname`
+- `APP_ORIGIN=https://your-exact-public-hostname` (optional when Railway supplies `RAILWAY_PUBLIC_DOMAIN`)
 - `DEMO_ACCESS_CODE=<private passcode, at least 8 characters>`
 - `DEMO_SESSION_SECRET=<random secret, at least 32 bytes>`
 - `NEXT_TELEMETRY_DISABLED=1`
+
+When `APP_ORIGIN` is unset, the app uses `https://` plus Railway's automatically provided [`RAILWAY_PUBLIC_DOMAIN`](https://docs.railway.com/variables/reference). An explicit `APP_ORIGIN` takes precedence. Only the exact configured origin is accepted; request headers never determine the trusted origin. Generate a public service domain before opening the demo. Local development still uses an explicit loopback origin.
 
 Keep the volume attached to the single replica. SQLite is configured for WAL and a 5 second busy timeout; table creation is idempotent. Changing replicas above one is unsupported because a local SQLite file cannot coordinate across instances. Railway Serverless/App Sleep is a dashboard setting; enable it in the service's Deploy settings if desired. A sleeping service can have a cold-start delay.
 
