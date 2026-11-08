@@ -54,13 +54,15 @@ assert.deepEqual([...new Set(current.data.state.foodMenu.map(item => item.catego
 pass('Authenticated SQLite workspace initializes with seed content');
 const secondState = await request('GET', undefined, second.cookie); assert.equal(secondState.status, 200);
 const nextDate = new Date(Date.now() + 120 * 86400000).toISOString().slice(0, 10);
-const inquiry = { name: 'QA Demo Host', email: 'host@example.test', phone: '', type: 'QA private celebration', service: 'Planning + bar', date: nextDate, time: '17:00', guests: 65, location: 'Demo Courtyard', budget: '5000-8000', notes: 'Test only, no real booking.' };
+const inquiry = { name: 'QA Demo Host', email: 'host@example.test', phone: '', type: 'QA private celebration', service: 'Wedding & day-of coordination', date: nextDate, time: '17:00', guests: 65, location: 'Demo Courtyard', budget: '5000-8000', notes: 'Test only, no real booking.' };
 async function action(action, payload, status = 200, version = current.data.version) { const r = await request('POST', { action, payload, version }, first.cookie); assert.equal(r.status, status, JSON.stringify(r.data)); if (status === 200) current = r; return r; }
-await action('createInquiry', { ...inquiry, date: '2020-01-01' }, 400); await action('createInquiry', { ...inquiry, email: 'invalid' }, 400); await action('createInquiry', { ...inquiry, guests: -2 }, 400); await action('createInquiry', { ...inquiry, name: '<script>alert(1)</script>' }, 400);
+await action('createInquiry', { ...inquiry, date: '2020-01-01' }, 400); await action('createInquiry', { ...inquiry, email: 'invalid' }, 400); await action('createInquiry', { ...inquiry, guests: -2 }, 400); await action('createInquiry', { ...inquiry, service: 'Unlisted service' }, 400); await action('createInquiry', { ...inquiry, name: '<script>alert(1)</script>' }, 400);
 pass('Past dates, invalid emails, invalid guest counts and HTML rejected');
 const before = current.data.version; await action('createInquiry', inquiry); const created = current.data.state.inquiries.find(i => i.name === 'QA Demo Host'); assert.ok(created?.eventId); assert.ok(current.data.state.events.find(e => e.id === created.eventId));
 pass('Booking creates inquiry and linked event atomically');
 await action('createInquiry', inquiry, 400); pass('Duplicate sample date and time rejected');
+const legacyInquiry = { ...inquiry, name: 'QA Legacy Service Host', service: 'Planning + bar', date: new Date(Date.now() + 121 * 86400000).toISOString().slice(0, 10), time: '18:00' };
+await action('createInquiry', legacyInquiry); assert.ok(current.data.state.inquiries.some(i => i.name === legacyInquiry.name && i.service === 'Planning + bar')); pass('Legacy inquiry service remains accepted');
 await action('updateInquiry', { id: created.id, status: 'contacted' }, 409, before); pass('Stale version cannot overwrite current data');
 await action('updateInquiry', { id: created.id, status: 'confirmed' }); assert.equal(current.data.state.inquiries.find(i => i.id === created.id).status, 'confirmed'); pass('Owner inquiry status persists');
 let event = structuredClone(current.data.state.events.find(e => e.id === created.eventId)); event.notes = 'Verified planning notes'; event.tasks.push({ id: 'qa-task', title: 'Choose linens', done: true }); event.timeline.push({ id: 'qa-moment', time: '19:00', title: 'Dinner' }); event.budgetItems = [{ id: 'qa-budget', name: 'Flowers', estimated: 850, actual: 700 }]; event.drinks = ['Raspberry spritz', 'Alcohol-free citrus cooler']; event.guests = 72; event.venue = 'Updated demo venue';

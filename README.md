@@ -1,22 +1,22 @@
 # Wander & Revel Event Services
 
-A private, interactive concept demo for Wander & Revel Event Services, covering event planning and mobile bartending. The supplied brand identity is used throughout; event imagery and content are illustrative, and the demo does not create real bookings or send messages.
+A private, interactive concept demo for Wander & Revel Event Services, covering wedding coordination, mobile bartending, private celebrations, styling, and customized event support. The tagline is **A Place for Every Story.** The supplied brand identity is used throughout; event imagery and content are illustrative, and the demo does not create real bookings or send messages.
 
 ## Demo walkthrough
 
 1. Open `/demo-access` and enter the owner-provided access code.
-2. Explore the home page, services, food menu, sample booking flow, event planner and owner studio.
+2. Explore Home, About us, Services, Gallery, and Inquire. Food menu, journal, event planner, and owner studio remain available through the footer.
 3. Add sample inquiries and edit planning, food menu, journal and gallery content. Each browser session receives its own isolated workspace.
 
-The slideshow supports manual controls, pause and reduced motion. Forms validate inputs, mutations use optimistic version checks, and state is persisted in SQLite. No email, SMS, payment, external calendar or real reservation is triggered.
+The homepage uses a static editorial photograph and a simple service-to-inquiry flow. Forms validate inputs, mutations use optimistic version checks, and state is persisted in SQLite. No email, SMS, payment, external calendar or real reservation is triggered.
 
-The sun/moon button on the access page and site header switches between light and dark mode. The initial theme follows the device setting; a manual selection is saved in that browser. The planner's printed report stays light.
+The sun/moon button on the access page and site header switches between light and dark mode. New visitors start in the approved ivory light theme; a manual selection is saved in that browser and existing choices are respected. The planner's printed report stays light.
 
 ## Food menu walkthrough
 
-- Open **Food menu** in the navigation to browse the sample appetizers, mains, sides and desserts. Only published dishes appear on this page.
+- Open **Food menu** in the footer to browse the sample appetizers, mains, sides and desserts. Only published dishes appear on this page.
 - In **Owner studio → Food menu**, add or edit dishes, descriptions, categories and dietary notes, and choose whether each dish is published. Changes belong to the current browser's demo workspace.
-- In **My event → Food menu**, choose a sample dish or add a custom idea. Adjust dish names, categories and event-specific notes, then choose **Save plan**. The printed event plan includes the food menu alongside the bar menu.
+- In **My event planner → Food menu**, choose a sample dish or add a custom idea. Adjust dish names, categories and event-specific notes, then choose **Save plan**. The printed event plan includes the food menu alongside the bar menu.
 - Saved event choices retain their own details when a menu dish is later edited or removed. Existing workspaces receive the new food fields without resetting their inquiries, plans or other content.
 
 All supplied dishes are fictional planning examples. They do not establish an actual catering offer, price, availability or dietary certification.
@@ -66,3 +66,7 @@ After a production build, `npm run verify:demo` runs the API checks using a temp
 ## Production follow-up
 
 Before using for real clients, confirm the domain/service areas, package scope, approved imagery/copy, operational permissions and business details; define staff/client access roles; connect booking/calendar and notification providers; agree reservation and payment terms; complete production security, accessibility and browser/device acceptance checks. None of those integrations are represented as enabled by this demo.
+
+## Editing the approved brand content
+
+`components/BrandPages.tsx` contains the home, about, and service copy; `app/brand.css` contains the six supplied palette values and public-page layout. The one-page inquiry lives in `components/demo/Booking.tsx`. The five service categories are accepted alongside legacy inquiry service values; no saved data migration is required. Older `#book` and `#highlights` links continue to resolve. The existing owner studio edits gallery, journal, and food-menu content within its private demo workspace. About copy uses the supplied philosophy only; no founder biography, credentials, service area, prices, or client work have been invented.

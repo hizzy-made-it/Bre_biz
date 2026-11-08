@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
+import "./brand.css";
 
 export const metadata: Metadata = {
-  title: "Wander & Revel Event Services | A little magic. A lot of intention.",
-  description: "Explore the Wander & Revel Event Services interactive concept demo for event planning and mobile bartending, with a sample booking flow, personal event planner and owner studio.",
+  title: "Wander & Revel Event Services | A Place for Every Story.",
+  description: "A Place for Every Story. Discover thoughtful wedding coordination, mobile bartending, private events, styling, and customized event support in this private concept demo.",
   robots: { index: false, follow: false },
   icons: {
     icon: "/favicon.svg",

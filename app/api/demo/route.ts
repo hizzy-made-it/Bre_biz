@@ -22,7 +22,16 @@ import type {
 } from "../../../lib/demo-types";
 
 const MAX_BODY_BYTES = 128 * 1024;
-const SERVICES = ["Event planning", "Mobile bartending", "Planning + bar"] as const;
+const SERVICES = [
+  "Wedding & day-of coordination",
+  "Mobile bartending",
+  "Private parties & special events",
+  "Setup, styling & teardown",
+  "Customized event support",
+  // Retain support for existing persisted inquiries and older links.
+  "Event planning",
+  "Planning + bar",
+] as const;
 const STATUSES = ["new", "contacted", "confirmed", "declined"] as const;
 const HIGHLIGHT_CATEGORIES = ["Weddings", "Private parties", "Corporate"] as const;
 const IMAGE_PATHS = [

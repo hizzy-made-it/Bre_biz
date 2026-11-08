@@ -16,8 +16,8 @@ export default async function DemoAccessPage() {
           <ThemeToggle />
         </div>
         <span className="small-label">Wander &amp; Revel Event Services · Interactive concept demo</span>
-        <h1>Step inside<br />the celebration.</h1>
-        <p>Enter the demo access code to explore the event planner, sample booking flow and owner studio.</p>
+        <h1>A Place for<br />Every Story.</h1>
+        <p>Enter the demo access code to explore the event planner, sample inquiry form and owner studio.</p>
         <AccessForm />
       </section>
     </main>

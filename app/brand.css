@@ -1,0 +1,192 @@
+/* Wander & Revel: the client's six-color palette. Sage and gold are accents;
+   charcoal and deep olive carry text to keep small copy readable. */
+:root {
+  --warm-ivory: #f7f3ea;
+  --soft-oat: #ddd4c5;
+  --muted-sage: #8c947e;
+  --deep-olive: #555c3d;
+  --champagne-gold: #b6a184;
+  --soft-charcoal: #292a27;
+}
+
+body { font-size: 16px; }
+h1, h2, h3 { letter-spacing: -.025em; }
+.button { font-size: 14px; border-radius: 3px; padding: 14px 24px; }
+input, select, textarea { font-size: 16px; border-radius: 3px; }
+.quiet-link { display: inline-block; width: fit-content; font-size: 14px; font-weight: 500; color: var(--accent); background: none; padding: 5px 0; border-bottom: 1px solid var(--champagne-gold); text-underline-offset: 5px; }
+.quiet-link:hover { border-bottom-color: currentColor; }
+.brand-caption { font-size: 13px; line-height: 1.6; color: var(--accent); margin-bottom: 20px; }
+.brand-section { width: min(100%, 1240px); padding: 80px 5%; margin: auto; }
+.brand-section p { max-width: 65ch; color: var(--muted); line-height: 1.85; }
+.brand-section h2 { color: var(--ink); font-size: clamp(32px, 3.3vw, 45px); line-height: 1.2; }
+.brand-section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 42px; }
+.brand-section-heading > p { max-width: 390px; font-size: 15px; }
+.brand-section-heading > .quiet-link { flex-shrink: 0; }
+.demo-ribbon { height: 30px; background: var(--surface-soft); color: var(--muted); font-size: 10px; }
+.demo-ribbon button { font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.site-header { height: 112px; position: relative; gap: 36px; padding: 0 6%; background: var(--cream); }
+.site-header > .brand-logo-link { width: 146px; }
+.brand-logo-image { mix-blend-mode: multiply; }
+.nav { margin-left: auto; margin-right: 0; gap: 36px; align-items: center; }
+.site-header .nav a { font-size: 14px; padding: 13px 0; }
+.nav a:last-child { color: var(--accent); }
+.theme-toggle { margin-left: 8px; background: transparent; border-color: var(--line); }
+
+.story-hero { max-width: 1440px; padding: 54px 6% 58px; margin: auto; display: grid; grid-template-columns: .95fr 1.05fr; gap: 7%; align-items: center; }
+.story-hero-copy { max-width: 520px; padding: 12px 0 30px; }
+.story-hero h1 { color: var(--ink); font-size: clamp(46px, 5vw, 72px); line-height: 1.12; margin-bottom: 27px; }
+.story-hero-copy > p:not(.brand-caption) { color: var(--muted); max-width: 44ch; line-height: 1.9; font-size: 15px; }
+.story-hero-copy > p:not(.brand-caption) + p { margin-top: 13px; }
+.story-actions { display: flex; align-items: flex-start; gap: 20px; flex-direction: column; margin-top: 32px; }
+.story-hero-image { margin: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.story-hero-image img { aspect-ratio: 1.02; height: auto; min-height: 0; object-fit: cover; object-position: 48% center; }
+.story-hero-image figcaption { color: var(--muted); font-size: 11px; padding-top: 12px; }
+.brand-introduction { text-align: center; max-width: 850px; padding-top: 56px; padding-bottom: 85px; }
+.brand-introduction h2 { margin-bottom: 26px; }
+.brand-introduction > p:not(.brand-caption) { margin: 0 auto 24px; max-width: 58ch; }
+.brand-services-home { border-top: 1px solid var(--line); }
+.brand-service-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 70px; }
+.brand-service-list article { padding: 30px 0; border-top: 1px solid var(--line); }
+.brand-service-list h3 { font-size: 26px; line-height: 1.35; margin-bottom: 14px; color: var(--accent); }
+.brand-service-list h3 a:hover { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+.brand-service-list p { font-size: 15px; }
+.brand-service-invitation { align-self: center; padding: 30px 0; }
+.brand-service-invitation p { margin-bottom: 10px; }
+.brand-gallery-home { padding-top: 26px; }
+.highlight-card:nth-child(2) { padding-top: 0; }
+.highlight-card img, .highlight-card:nth-child(2) img { aspect-ratio: 4/5; }
+.highlight-card h3 { font-size: 24px; }
+.highlight-card:hover img { transform: none; }
+.highlight-card .image-arrow { width: 36px; height: 36px; }
+.editorial-note { font-size: 12px; line-height: 1.7; }
+.table-wrap { position: relative; min-width: 0; max-width: 100%; }
+.workspace-grid > *, .studio-split > * { min-width: 0; }
+.brand-invitation { text-align: center; background: var(--surface-soft); padding: 76px 24px 82px; }
+.brand-invitation h2 { font-size: clamp(36px, 4vw, 52px); line-height: 1.2; color: var(--ink); }
+.brand-invitation p { max-width: 50ch; color: var(--muted); margin: 22px auto 28px; font-size: 15px; }
+.brand-page-intro { padding: 68px 24px 52px; text-align: center; max-width: 900px; margin: auto; }
+.brand-page-intro h1 { font-size: clamp(42px, 4.7vw, 64px); line-height: 1.16; margin-bottom: 24px; }
+.brand-page-intro > p:last-child { max-width: 53ch; color: var(--muted); margin: auto; font-size: 17px; }
+.brand-about { padding-top: 20px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 8%; }
+.brand-about img { aspect-ratio: .9; height: auto; object-fit: cover; }
+.brand-about h2 { margin-bottom: 26px; }
+.brand-about p + p { margin-top: 18px; }
+.brand-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 42px; padding-top: 20px; }
+.brand-values article { padding-top: 25px; border-top: 1px solid var(--champagne-gold); }
+.brand-values h2 { font-size: 28px; margin-bottom: 18px; }
+.brand-values p { font-size: 15px; }
+.brand-service-detail { padding-top: 10px; display: grid; grid-template-columns: .85fr 1.15fr; gap: 8%; align-items: start; }
+.brand-service-photo { position: sticky; top: 28px; }
+.brand-service-photo img { aspect-ratio: .74; height: auto; object-position: 28% center; }
+.brand-service-photo .editorial-note { margin-top: 14px; }
+.brand-service-detail article { padding: 30px 0 34px; border-top: 1px solid var(--line); }
+.brand-service-detail h2 { font-size: 31px; margin-bottom: 16px; }
+.brand-service-detail p { font-size: 15px; margin-bottom: 14px; }
+.brand-service-detail article:first-child { padding-top: 0; border-top: 0; }
+.brand-budget-note { padding-top: 10px; max-width: 850px; text-align: center; }
+.brand-budget-note h2 { font-size: 36px; margin-bottom: 24px; }
+.brand-budget-note p { margin: 0 auto 18px; }
+.page-intro h1 { color: var(--ink); }
+.page-intro > p { font-size: 16px; }
+
+.footer { background: var(--cream); padding-top: 55px; }
+.footer-top { grid-template-columns: 1.2fr 1.1fr 1fr 1fr; }
+.footer-top > .footer-brand { display: block; }
+.footer-brand .brand-logo-link { width: 168px; }
+.footer-brand p { margin-top: 14px; font-size: 13px; color: var(--accent); }
+.footer-top > p { color: var(--accent); font-size: 18px; padding-top: 12px; }
+.footer-top > div { font-size: 13px; gap: 12px; }
+.footer-label { font-weight: 600; margin-bottom: 5px; color: var(--ink); }
+.footer-bottom { font-size: 10px; border-top-color: var(--line); }
+
+.inquiry-shell { max-width: 1240px; grid-template-columns: .8fr 1.4fr; gap: 7%; margin-top: 64px; }
+.inquiry-shell .booking-aside { background: transparent; color: var(--ink); padding: 10px 0; border-radius: 0; }
+.inquiry-shell .booking-aside h1 { color: var(--ink); font-size: clamp(40px, 4vw, 54px); }
+.inquiry-shell .booking-aside p { color: var(--muted); font-size: 15px; }
+.inquiry-shell .booking-aside .small-label { color: var(--accent); font-size: 12px; margin-top: 0; }
+.inquiry-shell .booking-aside .inquiry-tagline { font-size: 15px; color: var(--accent); margin: 22px 0; }
+.inquiry-shell .booking-note { margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--line); color: var(--muted); line-height: 1.8; }
+.inquiry-main { border: 0; padding: 0; border-radius: 0; background: transparent; }
+.inquiry-section { border: 0; margin: 0 0 32px; padding: 0 0 32px; border-bottom: 1px solid var(--line); }
+.inquiry-section h2 { font-size: 29px; color: var(--ink); margin-bottom: 26px; }
+.inquiry-fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+.inquiry-fieldset legend { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+.inquiry-form label { font-size: 14px; }
+.inquiry-form .form-grid { gap: 24px 22px; }
+.inquiry-form .field > .muted { display: contents; }
+.inquiry-form .form-actions { justify-content: flex-start; gap: 22px; margin-top: 0; }
+.inquiry-disclosure { flex-basis: 100%; margin: 0; }
+.access-card { background: var(--white); border-color: var(--line); box-shadow: none; }
+.access-card h1 { font-size: clamp(40px, 5vw, 60px); line-height: 1.15; }
+.access-brand-row { margin-bottom: 32px; }
+
+@media screen {
+  html[data-theme="dark"] { --heading: #f7f3ea; }
+  html[data-theme="dark"] .brand-logo-image { mix-blend-mode: normal; }
+  html[data-theme="dark"] .inquiry-shell .booking-aside,
+  html[data-theme="dark"] .inquiry-shell .booking-main { background: transparent; color: var(--ink); }
+  html[data-theme="dark"] .inquiry-shell .booking-aside h1 { color: var(--ink); }
+  html[data-theme="dark"] .inquiry-shell .booking-aside p { color: var(--muted); }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .site-header { gap: 20px; }
+  .site-header .nav { gap: 24px; }
+  .site-header > .brand-logo-link { width: 126px; }
+  .story-hero { gap: 5%; }
+  .story-hero h1 { font-size: 53px; }
+  .inquiry-shell { gap: 4%; }
+}
+@media (max-width: 760px) {
+  .site-header { height: 96px; gap: 14px; padding: 0 6%; }
+  .site-header > .brand-logo-link { width: 122px; }
+  .site-header > .theme-toggle { margin-left: auto; }
+  .site-header .nav.is-open { top: 100%; padding: 16px 6% 24px; gap: 0; }
+  .site-header .nav a { min-height: 44px; padding: 12px 0; }
+  .mobile-toggle { min-width: 44px; min-height: 44px; }
+  .story-hero { grid-template-columns: 1fr; padding: 38px 6% 24px; gap: 30px; }
+  .story-hero-copy { max-width: 100%; padding: 0; }
+  .story-hero h1 { font-size: clamp(43px, 10.8vw, 64px); margin-bottom: 22px; }
+  .story-hero-copy > p:not(.brand-caption) { font-size: 15px; max-width: 48ch; }
+  .brand-caption { margin-bottom: 19px; font-size: 12px; }
+  .story-actions { gap: 18px; margin-top: 26px; }
+  .story-hero-image img { aspect-ratio: 1.15; }
+  .brand-section { padding: 54px 6%; }
+  .brand-section h2 { font-size: 34px; }
+  .brand-introduction { padding-top: 38px; padding-bottom: 56px; }
+  .brand-introduction p { font-size: 15px; }
+  .brand-section-heading { flex-direction: column; align-items: flex-start; gap: 24px; margin-bottom: 30px; }
+  .brand-service-list { grid-template-columns: 1fr; }
+  .brand-service-list article { padding: 25px 0; }
+  .brand-service-list h3 { font-size: 26px; }
+  .brand-service-invitation { padding: 22px 0 0; }
+  .brand-gallery-home { padding-top: 12px; }
+  .highlight-card img, .highlight-card:nth-child(2) img { aspect-ratio: 1.15; }
+  .brand-invitation { padding: 52px 6% 58px; }
+  .brand-page-intro { padding: 42px 6% 32px; }
+  .brand-page-intro h1 { font-size: 42px; }
+  .brand-page-intro > p:last-child { font-size: 16px; }
+  .brand-about { grid-template-columns: 1fr; padding-top: 10px; gap: 34px; }
+  .brand-about img { aspect-ratio: 1.1; }
+  .brand-about p { font-size: 15px; }
+  .brand-values { grid-template-columns: 1fr; padding-top: 0; gap: 30px; }
+  .brand-values h2 { font-size: 29px; }
+  .brand-service-detail { grid-template-columns: 1fr; gap: 32px; padding-top: 0; }
+  .brand-service-photo { position: static; }
+  .brand-service-photo img { aspect-ratio: 1.45; }
+  .brand-service-detail h2 { font-size: 29px; }
+  .brand-budget-note { padding-top: 0; }
+  .brand-budget-note h2 { font-size: 32px; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
+  .footer-top > .footer-brand { grid-column: 1/-1; }
+  .footer-top > p { display: none; }
+  .inquiry-shell { grid-template-columns: 1fr; padding: 0 6%; gap: 32px; margin-top: 32px; }
+  .inquiry-shell .booking-aside { position: static; padding: 0; }
+  .inquiry-shell .booking-aside h1 { font-size: 42px; }
+  .inquiry-main { padding: 0; }
+  .inquiry-section h2 { font-size: 29px; }
+  .inquiry-form .form-grid { gap: 20px; }
+  .inquiry-form .form-actions .button { width: 100%; }
+  .page-intro > p { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

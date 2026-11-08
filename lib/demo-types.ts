@@ -31,7 +31,14 @@ export type Inquiry = {
   email: string;
   phone: string;
   type: string;
-  service: "Event planning" | "Mobile bartending" | "Planning + bar";
+  service:
+    | "Wedding & day-of coordination"
+    | "Mobile bartending"
+    | "Private parties & special events"
+    | "Setup, styling & teardown"
+    | "Customized event support"
+    | "Event planning"
+    | "Planning + bar";
   date: string;
   time: string;
   guests: number;
