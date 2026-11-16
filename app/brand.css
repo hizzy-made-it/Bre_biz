@@ -331,3 +331,17 @@ input, select, textarea { font-size: 16px; border-radius: 3px; }
   .admin-badge{display:none}
 }
 @media print{.admin-header,.admin-nav{display:none!important}}
+
+/* ---------- Lock layout to the screen on phones ---------- */
+html,body{max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overscroll-behavior-x:none;position:relative}
+img,video,iframe,svg{max-width:100%}
+@media(max-width:900px){
+  html,body{overscroll-behavior-y:none}
+  /* iOS zooms into any field under 16px; keep every control at 16px on phones. */
+  input,select,textarea,.sheet td input,.sheet td select,.sheet-search input{font-size:16px!important}
+  .site-header,.admin-header{padding-left:max(5%,env(safe-area-inset-left));padding-right:max(5%,env(safe-area-inset-right))}
+  .footer{padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .drawer{width:100%;padding:20px 18px 60px}
+  .toast{max-width:calc(100vw - 24px)}
+}
