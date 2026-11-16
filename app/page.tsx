@@ -1,10 +1,9 @@
-import { redirect } from "next/navigation";
-import { getDemoUser } from "./demo-auth";
-import DemoApp from "./demo-app";
+import SiteApp from "@/components/site/SiteApp";
+import { loadSite, publicSite } from "@/lib/site-store";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-export default async function Page() {
-  if (!(await getDemoUser())) redirect("/demo-access");
-  return <DemoApp />;
+export default function Page() {
+  return <SiteApp initial={publicSite(loadSite().state)} />;
 }

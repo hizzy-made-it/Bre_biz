@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { FOOD_CATEGORIES } from "@/lib/food-menu";
+import { ImageField } from "@/components/admin/ImageField";
 import type {
   DemoState,
   FoodCategory,
@@ -23,7 +24,7 @@ import type {
   Post,
 } from "@/lib/demo-types";
 
-type StudioTab = "Overview" | "Inquiries" | "Journal" | "Highlights" | "Food menu";
+export type StudioTab = "Overview" | "Inquiries" | "Journal" | "Highlights" | "Food menu";
 type FoodDraft = Omit<FoodMenuItem, "id"> & { id?: string };
 type FoodSwitch = { kind: "tab"; value: StudioTab } | { kind: "item"; value: string | null } | { kind: "close"; value: null };
 type StudioProps = {
@@ -33,6 +34,8 @@ type StudioProps = {
   ready: boolean;
   onNotice: (message: string) => void;
   openPlanner: (id: string) => void;
+  initialTab?: StudioTab;
+  onClientCreated?: () => void;
 };
 
 const tabs: StudioTab[] = ["Overview", "Inquiries", "Journal", "Highlights", "Food menu"];
@@ -78,7 +81,7 @@ function blankHighlight(): Omit<Highlight, "id"> {
 }
 
 function blankFoodItem(): FoodDraft {
-  return { name: "", description: "", category: FOOD_CATEGORIES[0], dietaryNotes: "", published: false };
+  return { name: "", description: "", category: FOOD_CATEGORIES[0], dietaryNotes: "", published: false, price: "", image: "" };
 }
 
 function csvCell(value: string | number) {
@@ -110,13 +113,13 @@ function exportInquiries(inquiries: Inquiry[]) {
   const href = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = href;
-  link.download = "wander-revel-demo-inquiries.csv";
+  link.download = "wander-revel-inquiries.csv";
   link.click();
   URL.revokeObjectURL(href);
 }
 
-export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: StudioProps) {
-  const [tab, setTab] = useState<StudioTab>("Overview");
+export function Studio({ state, mutate, busy, ready, onNotice, openPlanner, initialTab = "Overview", onClientCreated }: StudioProps) {
+  const [tab, setTab] = useState<StudioTab>(initialTab);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedInquiryId, setSelectedInquiryId] = useState("");
@@ -251,7 +254,7 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
 
   async function deletePost() {
     if (!postDraft?.id) return;
-    if (!window.confirm("Delete this article from the demo journal? This cannot be undone.")) return;
+    if (!window.confirm("Delete this article from the journal? This cannot be undone.")) return;
     setPostError("");
     try {
       await mutate("deletePost", { id: postDraft.id });
@@ -281,7 +284,7 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
 
   async function deleteHighlight() {
     if (!highlightDraft?.id) return;
-    if (!window.confirm("Delete this highlight from the demo gallery? This cannot be undone.")) return;
+    if (!window.confirm("Delete this gallery item? This cannot be undone.")) return;
     setHighlightError("");
     try {
       await mutate("deleteHighlight", { id: highlightDraft.id });
@@ -293,20 +296,8 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
   }
 
   return (
-    <section className="workspace" aria-labelledby="studio-title">
-      <header className="workspace-header">
-        <div>
-          <span className="small-label">Private demo workspace</span>
-          <h1 id="studio-title">Owner studio</h1>
-          <p className="muted">Manage sample inquiries and the content shown in this concept.</p>
-        </div>
-        <a className="button secondary" href="#home"><ArrowLeft size={16} /> View the site</a>
-      </header>
-
-      {!ready && <div className="form-error" role="alert">Sign in to ChatGPT to load your private demo workspace.</div>}
-      {!ready && <p className="muted">Your changes are saved to your own demo workspace after it loads.</p>}
-
-      <nav className="filter-tabs" aria-label="Studio sections">
+    <section className="studio-embedded" aria-label="Studio">
+      <nav className="filter-tabs" aria-label="Studio sections" hidden>
         {tabs.map((item) => (
           <button key={item} type="button" className={tab === item ? "active" : ""} aria-pressed={tab === item} onClick={() => requestFoodSwitch({ kind: "tab", value: item })}>
             {item}
@@ -355,7 +346,7 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
           </div>
         </section>
 
-        {selectedInquiry && <InquiryDetails inquiry={selectedInquiry} statusDraft={statusDraft} setStatusDraft={setStatusDraft} error={inquiryError} busy={busy} ready={ready} onSave={saveInquiryStatus} openPlanner={openPlanner} />}
+        {selectedInquiry && <InquiryDetails inquiry={selectedInquiry} statusDraft={statusDraft} setStatusDraft={setStatusDraft} error={inquiryError} busy={busy} ready={ready} onSave={saveInquiryStatus} openPlanner={openPlanner} isClient={state.clients.some((client) => client.eventId !== null && client.eventId === selectedInquiry.eventId)} onConvert={async () => { setInquiryError(""); try { await mutate("convertInquiry", { id: selectedInquiry.id }); onNotice("Added to Clients — share their login code from the Clients tab"); onClientCreated?.(); } catch (error) { setInquiryError(error instanceof Error ? error.message : "Could not add client"); } }} />}
       </>}
 
       {tab === "Food menu" && <section className="panel content-panel food-studio" aria-labelledby="food-studio-heading">
@@ -414,13 +405,13 @@ export function Studio({ state, mutate, busy, ready, onNotice, openPlanner }: St
       </section>}
 
       {tab === "Highlights" && <section className="panel content-panel" aria-labelledby="highlights-heading">
-        <div className="panel-heading"><div><span className="small-label">Concept gallery</span><h2 id="highlights-heading">Highlights</h2></div><button type="button" className="button primary" onClick={() => { setHighlightError(""); setHighlightDraft(blankHighlight()); }} disabled={!ready || busy}><Plus size={16} /> New highlight</button></div>
+        <div className="panel-heading"><div><span className="small-label">Website gallery</span><h2 id="highlights-heading">Highlights</h2></div><button type="button" className="button primary" onClick={() => { setHighlightError(""); setHighlightDraft(blankHighlight()); }} disabled={!ready || busy}><Plus size={16} /> New highlight</button></div>
         <div className="studio-split">
           <div className="content-list" aria-label="Gallery highlights">
             {state.highlights.map((highlight) => <button key={highlight.id} type="button" className={`content-row ${highlightDraft?.id === highlight.id ? "selected" : ""}`} onClick={() => editHighlight(highlight)}>
               <span className="content-thumb"><img src={highlight.image} alt="" /></span><span><strong>{highlight.title}</strong><small>{highlight.category} · {highlight.guests} guests</small></span><ArrowUpRight size={15} aria-hidden="true" />
             </button>)}
-            {!state.highlights.length && <div className="empty-state">No gallery concepts yet. Add one when you are ready.</div>}
+            {!state.highlights.length && <div className="empty-state">No gallery items yet. Add one when you are ready.</div>}
           </div>
           {highlightDraft ? <div className="editor-panel">
             <div className="editor-heading"><div><span className="small-label">{highlightDraft.id ? "Edit highlight" : "New highlight"}</span><h3>{highlightDraft.title || "Untitled highlight"}</h3></div><button className="icon-button" type="button" aria-label="Close highlight editor" onClick={() => { setHighlightDraft(null); setHighlightError(""); }}>×</button></div>
@@ -450,6 +441,8 @@ function InquiryDetails({
   ready,
   onSave,
   openPlanner,
+  isClient,
+  onConvert,
 }: {
   inquiry: Inquiry;
   statusDraft: InquiryStatus;
@@ -459,6 +452,8 @@ function InquiryDetails({
   ready: boolean;
   onSave: () => void;
   openPlanner: (id: string) => void;
+  isClient: boolean;
+  onConvert: () => void;
 }) {
   return <section className="panel inquiry-detail" aria-labelledby="inquiry-detail-title">
     <div className="panel-heading"><div><span className="small-label">Inquiry details</span><h2 id="inquiry-detail-title">{inquiry.name}</h2></div><span className={`status-pill ${inquiry.status}`}>{capitalize(inquiry.status)}</span></div>
@@ -471,7 +466,7 @@ function InquiryDetails({
     </div>
     <div className="status-edit">
       <label className="field"><span>Inquiry status</span><select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value as InquiryStatus)}>{statuses.map((item) => <option key={item} value={item}>{capitalize(item)}</option>)}</select></label>
-      <div className="form-actions"><button type="button" className="button primary" onClick={onSave} disabled={busy || !ready}><Save size={16} /> Save status</button>{inquiry.eventId && <button type="button" className="button secondary" onClick={() => openPlanner(inquiry.eventId!)}>Open event plan <ArrowUpRight size={16} /></button>}</div>
+      <div className="form-actions"><button type="button" className="button primary" onClick={onSave} disabled={busy || !ready}><Save size={16} /> Save status</button>{inquiry.eventId && <button type="button" className="button secondary" onClick={() => openPlanner(inquiry.eventId!)}>Open event plan <ArrowUpRight size={16} /></button>}{!isClient && <button type="button" className="button primary" onClick={onConvert} disabled={busy}>Book it · add to Clients</button>}{isClient && <span className="status-pill confirmed">On client list</span>}</div>
     </div>
     {error && <div className="form-error" role="alert">{error}</div>}
   </section>;
@@ -505,7 +500,7 @@ function HighlightFields({ value, onChange }: { value: Omit<Highlight, "id"> & {
 }
 
 function ImageSelect({ value, onChange }: { value: string; onChange: (image: string) => void }) {
-  return <label className="field"><span>Image</span><select value={value} onChange={(event) => onChange(event.target.value)}>{images.map((image) => <option key={image.path} value={image.path}>{image.label}</option>)}</select></label>;
+  return <div className="full-width"><ImageField label="Photo" value={value} onChange={onChange} /></div>;
 }
 
 function capitalize(value: string) {

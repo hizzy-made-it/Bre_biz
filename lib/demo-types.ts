@@ -16,6 +16,55 @@ export type FoodMenuItem = {
   category: FoodCategory;
   dietaryNotes: string;
   published: boolean;
+  price: string;
+  image: string;
+};
+export const BAR_CATEGORIES = ["Signature cocktails", "Mocktails", "Beer & wine", "Bar packages"] as const;
+export type BarCategory = (typeof BAR_CATEGORIES)[number];
+export type BarMenuItem = {
+  id: string;
+  name: string;
+  description: string;
+  category: BarCategory;
+  price: string;
+  image: string;
+  published: boolean;
+};
+export type ServiceItem = { title: string; description: string; details: string; price: string };
+export type ClientStatus = "lead" | "booked" | "completed" | "cancelled";
+export type ClientUpdate = { id: string; at: string; message: string };
+export type Client = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  eventTitle: string;
+  service: string;
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
+  guests: number;
+  status: ClientStatus;
+  total: number;
+  deposit: number;
+  internalNotes: string;
+  clientNotes: string;
+  eventId: string | null;
+  portalCode: string;
+  updates: ClientUpdate[];
+  createdAt: string;
+};
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+export type Payment = {
+  id: string;
+  clientId: string;
+  amount: number;
+  method: "card" | "cash" | "check" | "other";
+  status: PaymentStatus;
+  note: string;
+  stripeSessionId: string;
+  createdAt: string;
 };
 export type EventFoodItem = {
   id: string;
@@ -31,14 +80,7 @@ export type Inquiry = {
   email: string;
   phone: string;
   type: string;
-  service:
-    | "Wedding & day-of coordination"
-    | "Mobile bartending"
-    | "Private parties & special events"
-    | "Setup, styling & teardown"
-    | "Customized event support"
-    | "Event planning"
-    | "Planning + bar";
+  service: string;
   date: string;
   time: string;
   guests: number;
@@ -90,7 +132,14 @@ export type DemoState = {
   posts: Post[];
   highlights: Highlight[];
   foodMenu: FoodMenuItem[];
+  barMenu: BarMenuItem[];
+  services: ServiceItem[];
+  content: Record<string, string>;
+  clients: Client[];
+  payments: Payment[];
 };
+/** What anonymous visitors receive: no inquiries, events, clients or payments. */
+export type PublicSite = Pick<DemoState, "posts" | "highlights" | "foodMenu" | "barMenu" | "services" | "content"> & { bookedSlots: { date: string; time: string }[] };
 
 export type DemoActionRequest = {
   action: string;

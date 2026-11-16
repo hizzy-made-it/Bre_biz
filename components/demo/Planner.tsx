@@ -78,7 +78,7 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
     try {
       await mutate("updateEvent", draft);
       setSavedSnapshot(JSON.stringify(draft));
-      onNotice("Plan saved to this demo workspace.");
+      onNotice("Event plan saved. The client sees the changes on their page.");
       return true;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The plan could not be saved. Your edits are still here.");
@@ -106,15 +106,15 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
   }
 
   if (!draft) return <section className="section">
-    <div className="page-intro"><p className="small-label">Your planning workspace</p><h1>Plan a celebration, one detail at a time.</h1><p>Create a demo inquiry to start a new event plan.</p><button className="button primary" type="button" onClick={book}>Start an inquiry</button></div>
-    <div className="empty-state"><CalendarDays aria-hidden="true" /><p>No event plans in this demo workspace yet.</p></div>
+    <div className="page-intro"><p className="small-label">Event plans</p><h1>No event plans yet.</h1><p>Plans are created when you book an inquiry or choose “Create event plan” on a client.</p><button className="button primary" type="button" onClick={book}>Go to clients</button></div>
+    <div className="empty-state"><CalendarDays aria-hidden="true" /><p>No event plans yet.</p></div>
   </section>;
 
   const taskProgress = draft.tasks.length ? Math.round(completedCount / draft.tasks.length * 100) : 0;
   return <section className="section planner-section" aria-labelledby="planner-title">
     <div className="planner-interactive print-hide">
     <header className="workspace-header">
-      <div><p className="small-label">{ready ? "Your private demo workspace" : "Sample preview"}</p><h1 id="planner-title">Event planner</h1><p>{ready ? "Organize the details in one place. Changes are saved only when you choose Save plan." : "Preview this sample event plan. Sign in to save edits to your demo workspace."}</p></div>
+      <div><p className="small-label">Event plans</p><h1 id="planner-title">Event planner</h1><p>Schedule, guests, food and bar choices. Booked clients see these details on their page after you save.</p></div>
       <div className="workspace-header-actions">
         <label className="field event-select-label"><span className="visually-hidden">Choose an event plan</span><select aria-label="Choose an event plan" value={draft.id} onChange={(event) => requestSwitch(event.target.value)}>
           {state.events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
@@ -141,7 +141,7 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
       </nav>
       <div className="planner-panel">
         {tab === "Overview" && <div className="planner-content">
-          <div className="panel-heading"><div><p className="small-label">Event details</p><h2>Shape the plan</h2></div><span className="status-pill">Demo plan</span></div>
+          <div className="panel-heading"><div><p className="small-label">Event details</p><h2>Shape the plan</h2></div></div>
           <div className="form-grid">
             <label className="field full-width">Event title<input required maxLength={160} value={draft.title} onChange={(e) => edit((event) => ({ ...event, title: e.target.value }))} /></label>
             <label className="field">Event date<input required type="date" value={draft.date} onChange={(e) => edit((event) => ({ ...event, date: e.target.value }))} /></label>
@@ -190,19 +190,20 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
 
         {tab === "Bar menu" && <div className="planner-content">
           <div className="panel-heading"><div><p className="small-label">A thoughtful menu</p><h2>Bar and drink menu</h2></div><span className="status-pill">Alcohol-free choices welcome</span></div>
-          <p className="muted">List proposed drinks and zero-proof options. This is a planning tool, not a service order.</p>
+          <p className="muted">Pick drinks from your bar menu or type a custom one.</p>
+          {state.barMenu.length > 0 && <div className="bar-options" aria-label="Add from your bar menu">{state.barMenu.map((item) => <button type="button" key={item.id} disabled={draft.drinks.includes(item.name)} onClick={() => edit((event) => ({ ...event, drinks: [...event.drinks, item.name] }))}>+ {item.name}</button>)}</div>}
           <form className="inline-add" onSubmit={(e) => { e.preventDefault(); const drink = drinkName.trim(); if (!drink) return; edit((event) => ({ ...event, drinks: [...event.drinks, drink] })); setDrinkName(""); }}>
             <label className="field"><span className="visually-hidden">Drink name or menu option</span><input required maxLength={120} value={drinkName} onChange={(e) => setDrinkName(e.target.value)} placeholder="Add a signature drink or zero-proof option" /></label><button className="button secondary" type="submit"><Plus size={16} aria-hidden="true" /> Add drink</button>
           </form>
           {draft.drinks.length ? <ul className="drink-list">{draft.drinks.map((drink, index) => <li key={`${index}-${drink}`}><span><span className="drink-dot" aria-hidden="true" />{drink}</span><button className="icon-button" type="button" aria-label={`Remove ${drink}`} onClick={() => edit((event) => ({ ...event, drinks: event.drinks.filter((_, itemIndex) => itemIndex !== index) }))}><Trash2 size={16} aria-hidden="true" /></button></li>)}</ul> : <div className="empty-state">Your menu is open. Add a first drink idea above.</div>}
-          <div className="panel menu-reminder"><strong>Menu reminder</strong><p>Confirm ingredients, allergies, venue rules, licensing, and service details with the responsible professionals before an actual event.</p></div>
+          
         </div>}
 
         {tab === "Food menu" && <div className="planner-content">
           <div className="panel-heading"><div><p className="small-label">Food ideas for this event</p><h2>Food menu</h2></div><span className="status-pill">Planning draft</span></div>
-          <p className="muted">Choose a sample dish or add one of your own. Adjust the details for this event.</p>
+          <p className="muted">Choose a dish from your menu or add a custom one. Adjust the details for this event.</p>
           <div className="food-planner-add">
-            <label className="field"><span>Add from sample menu</span><select aria-label="Add a dish from the sample menu" value="" onChange={(event) => { const item = publishedFood.find((food) => food.id === event.target.value); if (item) addCatalogFood(item); }}>
+            <label className="field"><span>Add from your menu</span><select aria-label="Add a dish from your menu" value="" onChange={(event) => { const item = publishedFood.find((food) => food.id === event.target.value); if (item) addCatalogFood(item); }}>
               <option value="">Choose a dish…</option>{publishedFood.map((item) => <option key={item.id} value={item.id} disabled={draft.foods.some((food) => food.menuItemId === item.id)}>{item.name} · {item.category}{draft.foods.some((food) => food.menuItemId === item.id) ? " (already added)" : ""}</option>)}
             </select></label>
             <form className="inline-add" onSubmit={(event) => { event.preventDefault(); addCustomFood(); }}>
@@ -225,22 +226,22 @@ export function Planner({ state, mutate, busy, ready, selectedId, onSelect, onNo
               </section>;
             })}
             <p className="muted">{draft.foods.length} / 100 dishes in this event plan.</p>
-          </div> : <div className="empty-state">No food ideas yet. Choose a sample dish or add a custom idea above.</div>}
+          </div> : <div className="empty-state">No food selected yet. Choose a dish or add a custom item above.</div>}
         </div>}
       </div>
     </div>
 
     {error && <p className="form-error" role="alert">{error}</p>}
     <div className="save-bar print-hide">
-      <div><strong>{!ready ? "Sample preview" : dirty ? "Unsaved changes" : "All changes saved"}</strong><span>{!ready ? "Sign in to save changes to a demo workspace." : dirty ? "Your draft stays here until you save." : "Edits persist in this demo workspace."}</span></div>
+      <div><strong>{dirty ? "Unsaved changes" : "All changes saved"}</strong><span>{dirty ? "Your draft stays here until you save." : "The client sees the saved plan."}</span></div>
       <button className="button primary" type="button" onClick={save} disabled={!dirty || busy || !ready}><Save size={16} aria-hidden="true" /> {busy ? "Saving…" : "Save plan"}</button>
     </div>
     </div>
 
     <article className="print-only printable-plan" aria-label={`Printable event plan: ${draft.title}`}>
-      <header className="print-plan-header"><BrandLogo className="print-brand-logo" /><p className="small-label">Wander &amp; Revel Event Services · Demo plan</p></header>
+      <header className="print-plan-header"><BrandLogo className="print-brand-logo" /><p className="small-label">Wander &amp; Revel Event Services · Event plan</p></header>
       <h1>{draft.title}</h1>
-      <p>This is a sample planning document. It is not a reservation or service order.</p>
+      
       <section aria-labelledby="print-details-title">
         <h2 id="print-details-title">Event details</h2>
         <dl className="print-details">
