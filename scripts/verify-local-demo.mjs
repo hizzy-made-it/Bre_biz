@@ -24,11 +24,15 @@ const env = {
   NEXT_TELEMETRY_DISABLED: '1',
   APP_ORIGIN: origin,
   DEMO_TEST_ORIGIN: origin,
-  DEMO_ACCESS_CODE: randomBytes(16).toString('hex'),
-  DEMO_SESSION_SECRET: randomBytes(48).toString('base64'),
+  ADMIN_PASSWORD: randomBytes(16).toString('hex'),
+  SESSION_SECRET: randomBytes(48).toString('base64'),
   DATABASE_PATH: join(testDirectory, 'demo.sqlite'),
 };
 delete env.DEMO_INSECURE_COOKIES;
+delete env.STRIPE_SECRET_KEY;
+delete env.STRIPE_WEBHOOK_SECRET;
+delete env.DEMO_SESSION_SECRET;
+delete env.RAILWAY_PUBLIC_DOMAIN;
 const server = spawn(process.execPath, [resolve('node_modules/next/dist/bin/next'), 'start', '--hostname', '127.0.0.1', '--port', String(port)], {
   env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -60,7 +64,7 @@ try {
   test = spawn(process.execPath, [resolve('scripts/verify-demo-api.mjs')], { env, windowsHide: true, stdio: 'inherit' });
   const [code] = await once(test, 'exit');
   assert.equal(timedOut, false, 'Local QA exceeded its two-minute limit');
-  assert.equal(code, 0, 'Demo API verification failed');
+  assert.equal(code, 0, 'Site API verification failed');
 } finally {
   clearTimeout(deadline);
   if (test && test.exitCode === null) test.kill();

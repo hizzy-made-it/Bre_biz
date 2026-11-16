@@ -26,3 +26,4 @@ function openDatabase() {
 }
 
 export function getDb() { return openDatabase().db; }
+export function getSqlite() { return openDatabase().sqlite; }

@@ -1,5 +1,6 @@
 import type { DemoState } from "./demo-types";
 import { createFoodMenuSeed } from "./food-menu";
+import { DEFAULT_SERVICES } from "./site-defaults";
 
 /** A fresh, explicitly fictional workspace for a newly authenticated demo user. */
 export function createDemoSeed(now = new Date()): DemoState {
@@ -209,6 +210,11 @@ The goal is not to control the weather; it is to make a clear choice early enoug
       },
     ],
     foodMenu,
+    barMenu: [],
+    services: DEFAULT_SERVICES,
+    content: {},
+    clients: [],
+    payments: [],
   };
 }
 

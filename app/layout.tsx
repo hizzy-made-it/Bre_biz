@@ -5,8 +5,7 @@ import "./brand.css";
 
 export const metadata: Metadata = {
   title: "Wander & Revel Event Services | A Place for Every Story.",
-  description: "A Place for Every Story. Discover thoughtful wedding coordination, mobile bartending, private events, styling, and customized event support in this private concept demo.",
-  robots: { index: false, follow: false },
+  description: "A Place for Every Story. Thoughtful wedding coordination, mobile bartending, private events, styling, and customized event support.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
