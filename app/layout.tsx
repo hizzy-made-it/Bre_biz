@@ -12,12 +12,10 @@ export const metadata: Metadata = {
   },
 };
 
-/** Fit the device width exactly; no zoom-in on input focus or pinch drift on phones. */
+/** Fit the device width; pinch-zoom stays available. 16px fields stop iOS tap-zoom. */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: "#F7F3EA",
 };
