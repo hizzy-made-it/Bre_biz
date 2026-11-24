@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import type { DemoState, ServiceItem } from "@/lib/demo-types";
-import { CONTENT_FIELDS, readContent, type ContentField } from "@/lib/site-defaults";
+import { CONTENT_FIELDS, CONTENT_GROUPS, readContent, type ContentField } from "@/lib/site-defaults";
 import { ImageField } from "./ImageField";
 
 type Mutate = (action: string, payload: unknown) => Promise<DemoState>;
-const GROUPS: ContentField["group"][] = ["Home", "About", "Services", "Menus", "Contact & footer"];
+const GROUPS: ContentField["group"][] = [...CONTENT_GROUPS];
 
 export function ContentEditor({ state, mutate, busy, onNotice }: { state: DemoState; mutate: Mutate; busy: boolean; onNotice: (t: string) => void }) {
   const [group, setGroup] = useState<ContentField["group"]>("Home");
@@ -58,7 +58,7 @@ export function ServicesEditor({ state, mutate, busy, onNotice }: { state: DemoS
   }
   return <section aria-labelledby="services-title">
     <div className="admin-section-head">
-      <div><h2 id="services-title">Services &amp; pricing</h2><p className="muted">These appear on the Home and Services pages and in the inquiry form. Leave price blank to hide it.</p></div>
+      <div><h2 id="services-title">Services &amp; pricing</h2><p className="muted">These appear on the Home and Services pages and in the inquiry form. Leave price blank to hide it. Mobile bar collections are edited under Website text &amp; photos → Mobile bar.</p></div>
       <div className="admin-actions"><button className="button secondary" onClick={() => setServices([...services, { title: "", description: "", details: "", price: "" }])}><Plus size={15} aria-hidden="true" /> Add service</button><button className="button primary" disabled={busy || !dirty} onClick={() => void save()}><Save size={15} aria-hidden="true" /> Save services</button></div>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
@@ -68,6 +68,7 @@ export function ServicesEditor({ state, mutate, busy, onNotice }: { state: DemoS
         <label className="field">Price <span className="muted">(as shown)</span><input value={service.price} maxLength={80} placeholder="Starting at $…" onChange={(e) => set(index, "price", e.target.value)} /></label>
         <label className="field full-width">Short summary<textarea rows={2} value={service.description} maxLength={600} onChange={(e) => set(index, "description", e.target.value)} /></label>
         <label className="field full-width">What’s included<textarea rows={2} value={service.details} maxLength={1200} onChange={(e) => set(index, "details", e.target.value)} /></label>
+        <div className="full-width"><ImageField label="Photo (Services page card)" value={service.image ?? ""} allowEmpty onChange={(path) => set(index, "image", path)} /></div>
       </div>
       <div className="service-edit-actions">
         <button className="icon-button" aria-label="Move up" disabled={index === 0} onClick={() => move(index, -1)}><ArrowUp size={16} /></button>

@@ -3,9 +3,10 @@ import { randomInt, randomUUID } from "node:crypto";
 import { getSqlite } from "../db";
 import { createDemoSeed } from "./demo-seed";
 import { createFoodMenuSeed, FOOD_CATEGORIES } from "./food-menu";
-import { CONTENT_FIELDS, DEFAULT_SERVICES, LEGACY_SERVICES } from "./site-defaults";
+import { CONTENT_FIELDS, DEFAULT_SERVICES, inquiryServiceOptions, LEGACY_SERVICES, ORIGINAL_SERVICE_TITLES, PARTNER_OPTION } from "./site-defaults";
 import {
   BAR_CATEGORIES,
+  HIGHLIGHT_CATEGORIES,
   type BarMenuItem,
   type Client,
   type ClientStatus,
@@ -31,7 +32,6 @@ import {
 export const SITE_KEY = "site";
 const MAX_BODY_BYTES = 128 * 1024;
 const STATUSES = ["new", "contacted", "confirmed", "declined"] as const;
-const HIGHLIGHT_CATEGORIES = ["Weddings", "Private parties", "Corporate"] as const;
 const IMAGE_PATHS = [
   "/images/celebration.webp",
   "/images/cocktails.webp",
@@ -145,24 +145,31 @@ export function validateInquiryInput(payload: Record<string, unknown>, serviceTi
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new ValidationError("email must be a valid email address");
   }
+  const service = oneOf(payload.service, [...serviceTitles, ...LEGACY_SERVICES], "service");
+  const type = payload.type === undefined || payload.type === null || payload.type === ""
+    ? (service === PARTNER_OPTION ? "Partnership inquiry" : "Event inquiry")
+    : requiredString(payload.type, "type", 100);
+  const common = {
+    name,
+    email,
+    phone: optionalString(payload.phone, "phone", 40),
+    type,
+    service,
+    location: requiredString(payload.location, "location", 240),
+    budget: optionalString(payload.budget, "budget", 100),
+    notes: optionalString(payload.notes, "notes", 3000),
+  };
+  // Venues and vendors asking to partner have no event date or guest count.
+  if (service === PARTNER_OPTION) return { ...common, date: "", time: "", guests: 0 };
   const date = validDate(payload.date, "date");
   if (date <= currentClientDate()) {
     throw new ValidationError("date must be in the future");
   }
   return {
-    name,
-    email,
-    phone: optionalString(payload.phone, "phone", 40),
-    type: payload.type === undefined || payload.type === null || payload.type === ""
-      ? "Event inquiry"
-      : requiredString(payload.type, "type", 100),
-    service: oneOf(payload.service, [...serviceTitles, ...LEGACY_SERVICES], "service"),
+    ...common,
     date,
     time: validTime(payload.time, "time"),
     guests: integerInRange(payload.guests, "guests", 1, 10000),
-    location: requiredString(payload.location, "location", 240),
-    budget: optionalString(payload.budget, "budget", 100),
-    notes: optionalString(payload.notes, "notes", 3000),
   };
 }
 
@@ -258,6 +265,7 @@ function validateHighlight(value: unknown): Omit<Highlight, "id"> & { id?: strin
     description: requiredString(value.description, "description", 1000),
     image: validImage(value.image),
     guests: integerInRange(value.guests, "guests", 1, 10000),
+    inspiration: value.inspiration === undefined ? true : value.inspiration === true,
   };
 }
 
@@ -266,7 +274,11 @@ export function updateState(state: DemoState, request: DemoActionRequest): DemoS
   const payload = request.payload;
   switch (request.action) {
     case "createInquiry": {
-      const input = validateInquiryInput(payload, state.services.map((service) => service.title));
+      const input = validateInquiryInput(payload, inquiryServiceOptions(state.services, state.content));
+      if (input.service === PARTNER_OPTION) {
+        const inquiry: Inquiry = { ...input, id: crypto.randomUUID(), status: "new", createdAt: new Date().toISOString(), eventId: null };
+        return { ...state, inquiries: [inquiry, ...state.inquiries] };
+      }
       const busy = state.inquiries.some((inquiry) =>
         inquiry.status !== "declined" && inquiry.date === input.date && inquiry.time === input.time,
       );
@@ -390,6 +402,24 @@ function isDemoState(value: unknown): value is DemoState {
     Array.isArray(value.posts) && Array.isArray(value.highlights);
 }
 
+/** Older photos get an inspiration flag; the sample photos move into the new gallery categories. */
+function migrateHighlight(item: Highlight): Highlight {
+  const demo = item.id.startsWith("highlight-demo-");
+  const category = demo && item.category === "Private parties" ? "Private celebrations"
+    : demo && item.category === "Corporate" ? "Event details"
+    : item.category;
+  return { ...item, category, inspiration: item.inspiration ?? (demo || item.title.startsWith("Demo ")) };
+}
+
+/** Sites still on the untouched original five services move to the expanded list; edited lists are kept. */
+function migrateServices(value: unknown): ServiceItem[] {
+  if (!Array.isArray(value)) return DEFAULT_SERVICES;
+  const services = value as ServiceItem[];
+  const untouched = services.length === ORIGINAL_SERVICE_TITLES.length &&
+    services.every((service, index) => service.title === ORIGINAL_SERVICE_TITLES[index] && !service.price);
+  return untouched ? DEFAULT_SERVICES : services;
+}
+
 function normalizeState(value: Record<string, unknown>): DemoState {
   const events = value.events as unknown[];
   if (events.some((event) => !isRecord(event))) throw new Error("Stored site events have an invalid shape");
@@ -413,7 +443,8 @@ function normalizeState(value: Record<string, unknown>): DemoState {
     events: normalizedEvents,
     foodMenu,
     barMenu: Array.isArray(value.barMenu) ? value.barMenu as BarMenuItem[] : [],
-    services: Array.isArray(value.services) ? value.services as ServiceItem[] : DEFAULT_SERVICES,
+    services: migrateServices(value.services),
+    highlights: (value.highlights as Highlight[]).map(migrateHighlight),
     content: isRecord(value.content) ? value.content as Record<string, string> : {},
     clients: Array.isArray(value.clients) ? (value.clients as Client[]).map((client) => ({ ...client, updates: client.updates ?? [] })) : [],
     payments: Array.isArray(value.payments) ? value.payments as Payment[] : [],
@@ -587,6 +618,7 @@ function updateBusinessState(state: DemoState, action: string, payload: Record<s
           description: optionalString(raw.description, "service summary", 600),
           details: optionalString(raw.details, "service details", 1200),
           price: optionalString(raw.price, "service price", 80),
+          image: validImage(raw.image, true),
         };
       });
       return { ...state, services };
