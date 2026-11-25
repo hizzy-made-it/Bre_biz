@@ -424,8 +424,12 @@ function migrateServices(value: unknown): ServiceItem[] {
 }
 
 /** A gallery still holding only the original sample photos shows Wander & Revel's own event photos instead. */
+const FIRST_PHOTO_SET = ["wedding-couple-arch", "wedding-ceremony", "wedding-couple-shore", "wedding-guests", "fair-hall", "balloon-door", "dessert-table", "fair-florist", "photo-booth", "fair-hall-draped", "balloon-wall", "fair-aisle", "fair-apothecary", "fair-kids-booth", "fair-aisle-candles", "fair-shoppers", "fair-blankets", "fair-vendor", "fair-beauty-booth"].map((id) => `wr-${id}`);
 function migrateHighlights(value: Highlight[]): Highlight[] {
-  const samplesOnly = value.every((item) => item.id.startsWith("highlight-demo-"));
+  // Only samples, or exactly the first supplied photo set (Nov 25 2026): refresh to the current photo set.
+  const ids = value.map((item) => item.id);
+  const firstSet = ids.length === FIRST_PHOTO_SET.length && FIRST_PHOTO_SET.every((id) => ids.includes(id));
+  const samplesOnly = firstSet || value.every((item) => item.id.startsWith("highlight-demo-"));
   return samplesOnly ? DEFAULT_HIGHLIGHTS : value.map(migrateHighlight);
 }
 

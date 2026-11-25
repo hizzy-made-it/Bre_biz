@@ -140,9 +140,12 @@ export const HIGHLIGHT_CATEGORIES = [
   "Markets",
   "Private parties",
   "Corporate",
+  "Venue Management",
+  "Private Parties",
+  "Halloween",
 ] as const;
 /** Gallery groups shown as tabs, in order; older categories still show after these when used. */
-export const GALLERY_CATEGORIES = HIGHLIGHT_CATEGORIES.slice(0, 5);
+export const GALLERY_CATEGORIES = ["Weddings", "Community Events", "Venue Management", "Private Parties", "Halloween", "Decor & Rentals", "Bar Service", "Events"] as const;
 export type HighlightCategory = (typeof HIGHLIGHT_CATEGORIES)[number];
 
 export type DemoState = {
