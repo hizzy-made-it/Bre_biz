@@ -30,7 +30,7 @@ export type BarMenuItem = {
   image: string;
   published: boolean;
 };
-export type ServiceItem = { title: string; description: string; details: string; price: string };
+export type ServiceItem = { title: string; description: string; details: string; price: string; image?: string };
 export type ClientStatus = "lead" | "booked" | "completed" | "cancelled";
 export type ClientUpdate = { id: string; at: string; message: string };
 export type Client = {
@@ -120,11 +120,26 @@ export type Post = {
 export type Highlight = {
   id: string;
   title: string;
-  category: "Weddings" | "Private parties" | "Corporate";
+  category: HighlightCategory;
   description: string;
   image: string;
   guests: number;
+  /** True for inspiration imagery, false for photos from Wander & Revel's own events. */
+  inspiration?: boolean;
 };
+export const HIGHLIGHT_CATEGORIES = [
+  "Weddings",
+  "Mobile bar services",
+  "Private celebrations",
+  "Event details",
+  "Behind the scenes",
+  "Markets",
+  "Private parties",
+  "Corporate",
+] as const;
+/** Categories shown as gallery filters; the last two remain valid for older saved photos. */
+export const GALLERY_CATEGORIES = HIGHLIGHT_CATEGORIES.slice(0, 6);
+export type HighlightCategory = (typeof HIGHLIGHT_CATEGORIES)[number];
 
 export type DemoState = {
   inquiries: Inquiry[];

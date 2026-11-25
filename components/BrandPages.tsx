@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ServiceItem } from '@/lib/demo-types';
-import { readContent } from '@/lib/site-defaults';
+import { barServiceOptions, COMPASS_KEYS, EVENT_CATEGORY_DEFAULTS, MOBILE_BAR_SERVICE, PARTNER_OPTION, readContent } from '@/lib/site-defaults';
 
 export type SiteCopy = { content: Record<string, string>; services: ServiceItem[] };
 type InquiryAction = { book: (service: string) => void };
@@ -17,7 +17,7 @@ function Paragraphs({ text }: { text: string }) {
 
 export function BrandHome({ book, site, children }: PageProps & { children: ReactNode }) {
   const c = (key: string) => readContent(site.content, key);
-  const fallback = site.services[site.services.length - 1]?.title ?? '';
+  const fallback = site.services[0]?.title ?? '';
   return <>
     <section className="story-hero" aria-labelledby="story-title">
       <div className="story-hero-copy">
@@ -54,17 +54,96 @@ export function BrandAbout({ book, site }: PageProps) {
   </>;
 }
 
+const DIRECTIONS: Record<string, string> = { north: 'N', east: 'E', south: 'S', west: 'W' };
+
+function scrollToId(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+}
+
 export function BrandServices({ book, site }: PageProps) {
   const c = (key: string) => readContent(site.content, key);
+  const first = site.services[0]?.title ?? '';
+  const barOptions = barServiceOptions(site.content);
   return <>
     <section className="brand-page-intro"><p className="brand-caption">Our services</p><h1><Headline text={c('services.title')} /></h1><p>{c('services.lead')}</p></section>
-    <section className="brand-service-detail brand-section"><div className="brand-service-photo"><img src={c('services.image')} alt="Event setting with an inviting bar and styled tables" width={1536} height={1024} /></div><div>{site.services.map(service => <article key={service.title}><h2>{service.title}</h2><p>{service.description}</p>{service.details && <p>{service.details}</p>}{service.price && <p className="service-price">{service.price}</p>}<button className="quiet-link" onClick={() => book(service.title)}>Inquire about this service<span className="sr-only">: {service.title}</span></button></article>)}</div></section>
-    <section className="brand-budget-note brand-section"><h2>{c('services.noteTitle')}</h2><Paragraphs text={c('services.note')} /><a className="quiet-link" href="#menu">Explore our food &amp; bar menus</a></section>
-    <BrandInvitation book={book} site={site} />
+    <section className="brand-section service-grid-section" aria-labelledby="service-grid-title">
+      <div className="brand-section-heading"><h2 id="service-grid-title"><Headline text={c('services.gridTitle')} /></h2><p>{c('services.gridLead')}</p></div>
+      <div className="service-card-grid">{site.services.map(service => {
+        const isBar = service.title === MOBILE_BAR_SERVICE;
+        return <article key={service.title} className="service-tile">
+          <img src={service.image || c('services.image')} alt="" width={1536} height={1024} loading="lazy" />
+          <div className="service-tile-body">
+            <h3>{service.title}</h3>
+            <p>{service.description}</p>
+            {service.details && <p className="service-tile-details">{service.details}</p>}
+            {service.price && <p className="service-price">{service.price}</p>}
+            <div className="service-tile-actions">
+              <button className="quiet-link" onClick={() => book(service.title)}>Inquire<span className="sr-only"> about {service.title}</span></button>
+              {isBar && <button className="quiet-link" onClick={() => scrollToId('compass-collections')}>See the Compass Collections</button>}
+            </div>
+          </div>
+        </article>;
+      })}</div>
+    </section>
+    <CompassCollections book={book} site={site} options={barOptions} />
+    <section className="brand-budget-note brand-section"><h2>{c('services.noteTitle')}</h2><Paragraphs text={c('services.note')} /><div className="budget-note-actions"><button className="button primary" onClick={() => book(first)}>Start your inquiry</button><a className="quiet-link" href="#menu">Explore our food &amp; bar menus</a></div></section>
+    <PartnerSection book={book} site={site} />
+  </>;
+}
+
+function CompassCollections({ book, site, options }: PageProps & { options: string[] }) {
+  const c = (key: string) => readContent(site.content, key);
+  return <section className="compass-section" id="compass-collections" aria-labelledby="compass-title">
+    <div className="brand-section">
+      <div className="compass-heading"><p className="brand-caption">{c('bar.caption')}</p><h2 id="compass-title"><Headline text={c('bar.collectionsTitle')} /></h2><p>{c('bar.collectionsLead')}</p></div>
+      <div className="compass-grid">{COMPASS_KEYS.map(([key], index) => <article key={key} className="compass-card">
+        <span className="compass-mark" aria-hidden="true">{DIRECTIONS[key]}</span>
+        <h3>{c(`bar.${key}.title`)}</h3>
+        <p className="compass-subtitle">{c(`bar.${key}.subtitle`)}</p>
+        <p>{c(`bar.${key}.body`)}</p>
+        <button className="button secondary" onClick={() => book(options[index])}>Inquire<span className="sr-only"> about {c(`bar.${key}.title`)}</span></button>
+      </article>)}</div>
+      <article className="compass-card compass-onsite">
+        <div><h3>{c('bar.onsite.title')}</h3><p>{c('bar.onsite.body')}</p></div>
+        <button className="button secondary" onClick={() => book(options[options.length - 1])}>Inquire<span className="sr-only"> about {c('bar.onsite.title')}</span></button>
+      </article>
+      <p className="compass-note">{c('bar.dryHire')}</p>
+    </div>
+  </section>;
+}
+
+export function PartnerSection({ book, site }: PageProps) {
+  const c = (key: string) => readContent(site.content, key);
+  return <section className="partner-section brand-section" aria-labelledby="partner-title">
+    <div><p className="brand-caption">{c('partner.caption')}</p><h2 id="partner-title"><Headline text={c('partner.title')} /></h2></div>
+    <div><p>{c('partner.body')}</p><button className="button secondary" onClick={() => book(PARTNER_OPTION)}>{c('partner.button')}</button></div>
+  </section>;
+}
+
+export function BrandEvents({ book, site }: PageProps) {
+  const c = (key: string) => readContent(site.content, key);
+  const first = site.services[0]?.title ?? '';
+  return <>
+    <section className="brand-page-intro"><p className="brand-caption">{c('events.caption')}</p><h1><Headline text={c('events.title')} /></h1><p>{c('events.lead')}</p></section>
+    <section className="brand-section event-category-section" aria-label="Events we celebrate">
+      <div className="event-category-grid">{EVENT_CATEGORY_DEFAULTS.map((_, index) => {
+        const n = index + 1;
+        const title = c(`events.cat${n}.title`);
+        if (!title) return null;
+        return <article key={n} className="event-category">
+          <img src={c(`events.cat${n}.image`)} alt="" width={1536} height={1024} loading="lazy" />
+          <h2>{title}</h2>
+          <p>{c(`events.cat${n}.body`)}</p>
+          <button className="quiet-link" onClick={() => book(first)}>Plan your event<span className="sr-only">: {title}</span></button>
+        </article>;
+      })}</div>
+      {c('home.galleryNote') && <p className="editorial-note">{c('home.galleryNote')}</p>}
+    </section>
+    <PartnerSection book={book} site={site} />
   </>;
 }
 
 export function BrandInvitation({ book, site }: PageProps) {
   const c = (key: string) => readContent(site.content, key);
-  return <section className="brand-invitation"><h2><Headline text={c('invite.title')} /></h2><p>{c('invite.body')}</p><button className="button primary" onClick={() => book(site.services[site.services.length - 1]?.title ?? '')}>Inquire about your event</button></section>;
+  return <section className="brand-invitation"><h2><Headline text={c('invite.title')} /></h2><p>{c('invite.body')}</p><button className="button primary" onClick={() => book(site.services[0]?.title ?? '')}>Inquire about your event</button></section>;
 }

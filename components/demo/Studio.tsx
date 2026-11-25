@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { FOOD_CATEGORIES } from "@/lib/food-menu";
 import { ImageField } from "@/components/admin/ImageField";
+import { HIGHLIGHT_CATEGORIES } from "@/lib/demo-types";
 import type {
   DemoState,
   FoodCategory,
@@ -45,11 +46,7 @@ const images = [
   { path: "/images/cocktails.webp", label: "Cocktails" },
   { path: "/images/details.webp", label: "Details" },
 ];
-const highlightCategories: Highlight["category"][] = [
-  "Weddings",
-  "Private parties",
-  "Corporate",
-];
+const highlightCategories: Highlight["category"][] = [...HIGHLIGHT_CATEGORIES];
 
 function dateLabel(value: string) {
   const date = new Date(`${value}T12:00:00`);
@@ -77,6 +74,7 @@ function blankHighlight(): Omit<Highlight, "id"> {
     description: "",
     image: "/images/celebration.webp",
     guests: 1,
+    inspiration: false,
   };
 }
 
@@ -496,6 +494,7 @@ function HighlightFields({ value, onChange }: { value: Omit<Highlight, "id"> & {
     <label className="field"><span>Guest count</span><input type="number" min={1} max={10000} value={value.guests} onChange={(event) => set("guests", Number(event.target.value))} required /></label>
     <label className="field full-width"><span>Description</span><textarea value={value.description} maxLength={1000} rows={4} onChange={(event) => set("description", event.target.value)} required /></label>
     <ImageSelect value={value.image} onChange={(image) => set("image", image)} />
+    <label className="field full-width checkbox-field"><span><input type="checkbox" checked={value.inspiration !== false} onChange={(event) => set("inspiration", event.target.checked)} /> Inspiration image (not from one of our events)</span></label>
   </div>;
 }
 
