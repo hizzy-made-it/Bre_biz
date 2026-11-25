@@ -129,6 +129,10 @@ export type Highlight = {
 };
 export const HIGHLIGHT_CATEGORIES = [
   "Weddings",
+  "Community Events",
+  "Decor & Rentals",
+  "Bar Service",
+  "Events",
   "Mobile bar services",
   "Private celebrations",
   "Event details",
@@ -137,8 +141,8 @@ export const HIGHLIGHT_CATEGORIES = [
   "Private parties",
   "Corporate",
 ] as const;
-/** Categories shown as gallery filters; the last two remain valid for older saved photos. */
-export const GALLERY_CATEGORIES = HIGHLIGHT_CATEGORIES.slice(0, 6);
+/** Gallery groups shown as tabs, in order; older categories still show after these when used. */
+export const GALLERY_CATEGORIES = HIGHLIGHT_CATEGORIES.slice(0, 5);
 export type HighlightCategory = (typeof HIGHLIGHT_CATEGORIES)[number];
 
 export type DemoState = {
