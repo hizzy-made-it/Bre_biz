@@ -419,3 +419,12 @@ html[data-theme="dark"] .site-footer-cta { background: #2f3424; }
   .site-footer-cta .footer-brand { grid-column: 1 / -1; }
   .lightbox-image { max-height: 60vh; }
 }
+
+/* Breanna Nov 23 fixes */
+.brand-introduction .brand-caption { margin-left: auto; margin-right: auto; }
+.footer-brand-centered { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; margin: 0 auto 46px; padding: 0 5% 46px; border-bottom: 1px solid rgba(247, 243, 234, .18); }
+.footer-brand-centered .footer-logo { display: block; width: 200px; }
+.footer-brand-centered .footer-logo img { width: 100%; height: auto; filter: grayscale(1) invert(1); mix-blend-mode: screen; }
+.footer-brand-centered p { margin: 10px auto 0; text-align: center; color: var(--warm-ivory); }
+.site-footer-cta .footer-top { grid-template-columns: 1fr 1fr; max-width: 760px; margin: 0 auto; }
+@media (max-width: 760px) { .footer-brand-centered .footer-logo { width: 160px; } }

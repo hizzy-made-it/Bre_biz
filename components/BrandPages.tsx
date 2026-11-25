@@ -86,7 +86,7 @@ export function BrandServices({ book, site }: PageProps) {
       })}</div>
     </section>
     <CompassCollections book={book} site={site} options={barOptions} />
-    <section className="brand-budget-note brand-section"><h2>{c('services.noteTitle')}</h2><Paragraphs text={c('services.note')} /><div className="budget-note-actions"><button className="button primary" onClick={() => book(first)}>Start your inquiry</button><a className="quiet-link" href="#menu">Explore our food &amp; bar menus</a></div></section>
+    <section className="brand-budget-note brand-section"><h2>{c('services.noteTitle')}</h2><Paragraphs text={c('services.note')} /><div className="budget-note-actions"><button className="button primary" onClick={() => book(first)}>Start your inquiry</button></div></section>
     <PartnerSection book={book} site={site} />
   </>;
 }
