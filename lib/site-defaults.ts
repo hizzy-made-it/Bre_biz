@@ -1,6 +1,6 @@
-import type { ServiceItem } from "./demo-types";
+import type { Highlight, ServiceItem } from "./demo-types";
 
-export const CONTENT_GROUPS = ["Home", "About", "Services", "Mobile bar", "Events we celebrate", "Partner with us", "Menus", "Contact & footer"] as const;
+export const CONTENT_GROUPS = ["Home", "About", "Services", "Mobile bar", "Gallery", "Inquiry", "Events we celebrate", "Partner with us", "Menus", "Contact & footer"] as const;
 export type ContentGroup = (typeof CONTENT_GROUPS)[number];
 
 export type ContentField = {
@@ -20,48 +20,66 @@ export const COMPASS_KEYS: [string, string, string, string][] = [
 ];
 
 export const EVENT_CATEGORY_DEFAULTS: [string, string, string][] = [
-  ["Weddings & Elopements", "From an intimate elopement to a full guest list, we help your day feel calm, personal and beautifully put together.", "/images/celebration.webp"],
-  ["Private Parties & Milestones", "Birthdays, anniversaries, graduations and just-because gatherings, celebrated with warmth and good company.", "/images/cocktails.webp"],
+  ["Weddings & Elopements", "From an intimate elopement to a full guest list, we help your day feel calm, personal and beautifully put together.", "/images/wr/wedding-couple-arch.webp"],
+  ["Private Parties & Milestones", "Birthdays, anniversaries, graduations and just-because gatherings, celebrated with warmth and good company.", "/images/wr/dessert-table.webp"],
   ["Corporate Events & Mixers", "Team celebrations, client evenings and open houses with easy flow and a welcoming bar.", "/images/details.webp"],
-  ["Bridal & Baby Showers", "Sweet, relaxed gatherings with thoughtful details, styled tables and drinks everyone can enjoy.", "/images/details.webp"],
-  ["Markets & Community Events", "Craft fairs, vendor markets and community days, with bar service and setup support that scales.", "/images/celebration.webp"],
+  ["Bridal & Baby Showers", "Sweet, relaxed gatherings with thoughtful details, styled tables and drinks everyone can enjoy.", "/images/wr/balloon-door.webp"],
+  ["Markets & Community Events", "Craft fairs, vendor markets and community days, with bar service and setup support that scales.", "/images/wr/fair-hall.webp"],
   ["Fundraisers & Special Events", "Galas, benefits and one-of-a-kind occasions, handled with care so the cause stays center stage.", "/images/cocktails.webp"],
 ];
+
+/** Featured story shown beside each gallery group: category, headline, story, and what Wander & Revel did. */
+export const GALLERY_FEATURES: [string, string, string, string][] = [
+  ["Weddings", "A Destination Beach Wedding", "Barefoot on the sand with the ocean behind them, this couple said their vows surrounded by the family and friends who traveled to celebrate with them.", "Wander & Revel planned this destination wedding."],
+  ["Community Events", "The Annual Galentine’s Craft Fair", "Going on seven years, this public craft fair brings local makers, florists and small businesses together under one roof, with balloon walls and photo moments for every guest. It has even been featured on Fox 9 News.", "Wander & Revel coordinates this fair every year."],
+  ["Decor & Rentals", "Sweet Displays & Photo Moments", "Dessert tables, balloon walls and photo booth backdrops give guests something to gather around and remember.", "Decor and displays from Wander & Revel events."],
+];
+export function featureSlug(category: string): string {
+  return category.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");
+}
 
 /** Every editable piece of public copy and imagery. Keys are stable; labels are for the owner. */
 export const CONTENT_FIELDS: ContentField[] = [
   { key: "home.caption", label: "Small caption above the headline", group: "Home", kind: "text", default: "Wander & Revel Event Services" },
   { key: "home.title", label: "Main headline", group: "Home", kind: "text", default: "A Place for Every Story." },
-  { key: "home.lead", label: "Headline subtitle", group: "Home", kind: "text", default: "Thoughtful celebrations, beautifully brought together." },
-  { key: "home.body", label: "Intro paragraph", group: "Home", kind: "textarea", default: "From wedding days to just-because gatherings, we help bring your vision to life with warmth, care, and room for what makes it yours." },
-  { key: "home.heroImage", label: "Main photo", group: "Home", kind: "image", default: "/images/details.webp" },
-  { key: "home.heroCaption", label: "Main photo caption", group: "Home", kind: "text", default: "Imagine the gathering. Make it your own." },
+  { key: "home.lead", label: "Spaced-out line under the headline", group: "Home", kind: "text", default: "Thoughtfully planned. Beautifully celebrated. Uniquely yours." },
+  { key: "home.body", label: "Intro paragraph", group: "Home", kind: "textarea", default: "At Wander & Revel Event Services, we believe the best celebrations are the ones that feel like you. From intimate gatherings to grand celebrations, we bring creativity, organization, and genuine hospitality to every occasion." },
+  { key: "home.heroImage", label: "Main photo", group: "Home", kind: "image", default: "/images/wr/wedding-ceremony.webp" },
+  { key: "home.heroCaption", label: "Main photo description (for screen readers)", group: "Home", kind: "text", default: "A beach wedding ceremony planned by Wander & Revel" },
   { key: "home.welcomeTitle", label: "Welcome section headline", group: "Home", kind: "text", default: "Every celebration begins with your story." },
   { key: "home.welcomeBody", label: "Welcome section text", group: "Home", kind: "textarea", default: "The people you love. The moments you want to remember. The details that feel like you. We believe a beautiful event starts with listening, then finding a thoughtful way to bring it all together." },
-  { key: "home.servicesTitle", label: "Services section headline", group: "Home", kind: "text", default: "A little support. A world of possibility." },
-  { key: "home.servicesBody", label: "Services section text", group: "Home", kind: "textarea", default: "Choose the help that feels right for your occasion. We’ll start with your priorities and shape the details around them." },
-  { key: "home.galleryNote", label: "Gallery note", group: "Home", kind: "text", default: "Event inspiration imagery." },
+  { key: "home.galleryTitle", label: "Gallery strip headline", group: "Home", kind: "text", default: "Real celebrations." },
+  { key: "home.galleryNote", label: "Gallery strip text", group: "Home", kind: "text", default: "Weddings, community events and the details in between, from events we have planned and coordinated." },
   { key: "invite.title", label: "Closing call-to-action headline", group: "Home", kind: "text", default: "Let’s make room for your story." },
   { key: "invite.body", label: "Closing call-to-action text", group: "Home", kind: "text", default: "Big plans, small gatherings, and all the possibilities in between." },
 
-  { key: "about.title", label: "Page headline", group: "About", kind: "text", default: "Thoughtful by nature. Personal by design." },
-  { key: "about.image", label: "Photo", group: "About", kind: "image", default: "/images/celebration.webp" },
-  { key: "about.storyTitle", label: "Story headline", group: "About", kind: "text", default: "A celebration that feels like you." },
-  { key: "about.story", label: "Story (blank line between paragraphs)", group: "About", kind: "textarea", default: "Wander & Revel is built around a simple philosophy: every celebration is unique, and every story deserves a place to unfold.\n\nOur role is to listen to your vision and help bring it to life. Whether you’re gathering a few favorite people or planning a wedding day, we approach the details with the same care.\n\nWe believe professional support can feel warm and approachable. Share your priorities, your ideas, and your budget. Together, those are the starting point for an event that feels personal and thoughtfully put together." },
-  { key: "about.value1Title", label: "Value 1 headline", group: "About", kind: "text", default: "Listen first." },
-  { key: "about.value1", label: "Value 1 text", group: "About", kind: "textarea", default: "The best starting point is you: what you love, what matters most, and how you want the day to feel." },
-  { key: "about.value2Title", label: "Value 2 headline", group: "About", kind: "text", default: "Care for the details." },
-  { key: "about.value2", label: "Value 2 text", group: "About", kind: "textarea", default: "A considered plan makes room for connection, from the first welcome to the last goodnight." },
-  { key: "about.value3Title", label: "Value 3 headline", group: "About", kind: "text", default: "Make room for possibility." },
-  { key: "about.value3", label: "Value 3 text", group: "About", kind: "textarea", default: "Beautiful experiences take many forms. We welcome different ideas, celebrations, and budgets." },
+  { key: "about.title", label: "Page headline", group: "About", kind: "text", default: "Meet Wander & Revel" },
+  { key: "about.script", label: "Handwritten line under the headline", group: "About", kind: "text", default: "A love for hospitality, meaningful connections, and the moments that bring people together." },
+  { key: "about.intro", label: "Intro paragraph", group: "About", kind: "textarea", default: "Wander & Revel Event Services was created from a passion for celebrations that feel personal, intentional, and unforgettable. From intimate gatherings to grand celebrations, we bring creativity, organization, and genuine hospitality to every event." },
+  { key: "about.image", label: "Top photo", group: "About", kind: "image", default: "/images/cocktails.webp" },
+  { key: "about.storyImage", label: "Our story photo", group: "About", kind: "image", default: "/images/wr/dessert-table.webp" },
+  { key: "about.storyTitle", label: "Story headline", group: "About", kind: "text", default: "More Than Just Events" },
+  { key: "about.story", label: "Story (blank line between paragraphs)", group: "About", kind: "textarea", default: "With a background in hospitality, bartending, event operations, and coordination, we understand that successful events require more than beautiful decorations. They require thoughtful preparation, clear communication, flexibility, and attention to the details that guests may never see.\n\nWe believe celebrations should be personal, not one-size-fits-all. Whether you’re planning a wedding, hosting a private event, organizing a community gathering, or simply need an extra set of experienced hands, we’re here to help bring your vision to life." },
+  { key: "about.mission", label: "Handwritten mission line", group: "About", kind: "text", default: "Our mission is simple: to make the planning process easier, the experience more enjoyable, and the memories unforgettable." },
+  { key: "about.drive1", label: "What drives us 1", group: "About", kind: "text", default: "Genuine Hospitality" },
+  { key: "about.drive2", label: "What drives us 2", group: "About", kind: "text", default: "Creativity & Fresh Ideas" },
+  { key: "about.drive3", label: "What drives us 3", group: "About", kind: "text", default: "Professionalism & Reliability" },
+  { key: "about.drive4", label: "What drives us 4", group: "About", kind: "text", default: "Inclusivity for All" },
+  { key: "about.drive5", label: "What drives us 5", group: "About", kind: "text", default: "Adventure & Connection" },
+  { key: "about.closingTitle", label: "Closing headline", group: "About", kind: "text", default: "Every Story Matters" },
+  { key: "about.closingBody", label: "Closing text", group: "About", kind: "textarea", default: "From the big milestones to the simple moments, we’re honored to be a part of your story. Because every gathering, no matter the size, deserves to be thoughtfully planned and beautifully celebrated." },
+  { key: "about.closingImage", label: "Closing photo", group: "About", kind: "image", default: "/images/wr/wedding-couple-shore.webp" },
 
-  { key: "services.title", label: "Page headline", group: "Services", kind: "text", default: "Your vision. Thoughtfully supported." },
-  { key: "services.lead", label: "Page subtitle", group: "Services", kind: "text", default: "From the first idea to the final details, choose the support your celebration needs." },
-  { key: "services.image", label: "Photo", group: "Services", kind: "image", default: "/images/celebration.webp" },
-  { key: "services.gridTitle", label: "Services grid headline", group: "Services", kind: "text", default: "Everything we offer." },
-  { key: "services.gridLead", label: "Services grid subtitle", group: "Services", kind: "textarea", default: "Choose one service or bring a few together. Every celebration is quoted around your plans." },
-  { key: "services.noteTitle", label: "Pricing note headline", group: "Services", kind: "text", default: "Good plans start with a conversation." },
-  { key: "services.note", label: "Pricing note text", group: "Services", kind: "textarea", default: "You don’t need every detail figured out. Tell us your date, location, guest count, and what you have in mind. Share a budget range if you’d like. Scope, availability, and pricing are confirmed in a personal proposal." },
+  { key: "services.title", label: "Page headline", group: "Services", kind: "text", default: "Celebration Support for Every Occasion" },
+  { key: "services.lead", label: "Page subtitle", group: "Services", kind: "textarea", default: "From bar service and event coordination to thoughtful details and meaningful ceremonies, Wander & Revel offers a range of services to bring your vision to life." },
+  { key: "services.image", label: "Top photo", group: "Services", kind: "image", default: "/images/cocktails.webp" },
+  { key: "services.experienceTitle", label: "Experience strip headline", group: "Services", kind: "text", default: "The Wander & Revel Experience" },
+  { key: "services.exp1", label: "Experience 1", group: "Services", kind: "text", default: "Personalized Planning" },
+  { key: "services.exp2", label: "Experience 2", group: "Services", kind: "text", default: "Professional Hospitality" },
+  { key: "services.exp3", label: "Experience 3", group: "Services", kind: "text", default: "Attention to Detail" },
+  { key: "services.exp4", label: "Experience 4", group: "Services", kind: "text", default: "Flexible & Customized" },
+  { key: "services.ctaTitle", label: "Closing headline", group: "Services", kind: "text", default: "Let’s Plan Something Memorable" },
+  { key: "services.ctaBody", label: "Closing text", group: "Services", kind: "textarea", default: "Tell us about your event and the services you’re interested in, and we’ll create a customized proposal for your celebration." },
 
   { key: "bar.caption", label: "Small caption", group: "Mobile bar", kind: "text", default: "Mobile bar services" },
   { key: "bar.collectionsTitle", label: "Collections headline", group: "Mobile bar", kind: "text", default: "The Compass Collections." },
@@ -74,6 +92,27 @@ export const CONTENT_FIELDS: ContentField[] = [
   ]),
   { key: "bar.onsite.title", label: "Standalone bartending: name", group: "Mobile bar", kind: "text", default: "On-Site Bartending" },
   { key: "bar.onsite.body", label: "Standalone bartending: description", group: "Mobile bar", kind: "textarea", default: "Already have a bar or venue? Book professional bartenders on their own, for any celebration." },
+
+  { key: "gallery.title", label: "Page headline", group: "Gallery", kind: "text", default: "Our Gallery" },
+  { key: "gallery.script", label: "Handwritten line", group: "Gallery", kind: "text", default: "Real Celebrations. Thoughtfully Curated." },
+  { key: "gallery.image", label: "Banner photo", group: "Gallery", kind: "image", default: "/images/wr/wedding-guests.webp" },
+  ...GALLERY_FEATURES.flatMap(([category, title, body, credit]): ContentField[] => {
+    const slug = featureSlug(category);
+    return [
+      { key: `gallery.${slug}.title`, label: `${category}: featured headline`, group: "Gallery", kind: "text", default: title },
+      { key: `gallery.${slug}.body`, label: `${category}: featured story`, group: "Gallery", kind: "textarea", default: body },
+      { key: `gallery.${slug}.credit`, label: `${category}: what we did`, group: "Gallery", kind: "textarea", default: credit },
+    ];
+  }),
+  { key: "gallery.ctaTitle", label: "Closing headline", group: "Gallery", kind: "text", default: "Let’s Create Your Next Celebration" },
+  { key: "gallery.ctaBody", label: "Closing text", group: "Gallery", kind: "text", default: "Inspired by what you see? Let’s bring your vision to life." },
+
+  { key: "inquiry.title", label: "Page headline", group: "Inquiry", kind: "text", default: "Let’s Plan Your Event" },
+  { key: "inquiry.lead", label: "Page subtitle", group: "Inquiry", kind: "textarea", default: "Tell us about your vision, and we’ll create a personalized proposal for your celebration." },
+  { key: "inquiry.image", label: "Banner photo", group: "Inquiry", kind: "image", default: "/images/details.webp" },
+  { key: "inquiry.step1", label: "Next step 1", group: "Inquiry", kind: "text", default: "We receive your inquiry" },
+  { key: "inquiry.step2", label: "Next step 2", group: "Inquiry", kind: "text", default: "We review the details" },
+  { key: "inquiry.step3", label: "Next step 3", group: "Inquiry", kind: "text", default: "We follow up with a custom proposal" },
 
   { key: "events.caption", label: "Small caption", group: "Events we celebrate", kind: "text", default: "Events we celebrate" },
   { key: "events.title", label: "Page headline", group: "Events we celebrate", kind: "text", default: "Every kind of gathering. All in good hands." },
@@ -97,9 +136,9 @@ export const CONTENT_FIELDS: ContentField[] = [
 
   { key: "contact.email", label: "Contact email (shown in footer)", group: "Contact & footer", kind: "text", default: "info@wanderandrevelevents.com" },
   { key: "contact.phone", label: "Contact phone (shown in footer)", group: "Contact & footer", kind: "text", default: "" },
-  { key: "contact.instagram", label: "Instagram link", group: "Contact & footer", kind: "text", default: "" },
-  { key: "contact.facebook", label: "Facebook link", group: "Contact & footer", kind: "text", default: "" },
-  { key: "contact.area", label: "Service area", group: "Contact & footer", kind: "text", default: "" },
+  { key: "contact.instagram", label: "Instagram link (full https address)", group: "Contact & footer", kind: "text", default: "" },
+  { key: "contact.facebook", label: "Facebook link (full https address)", group: "Contact & footer", kind: "text", default: "" },
+  { key: "contact.area", label: "Service area", group: "Contact & footer", kind: "text", default: "Minnesota and surrounding areas. Travel may be available upon request." },
   { key: "footer.tagline", label: "Footer tagline", group: "Contact & footer", kind: "text", default: "A Place for Every Story." },
   { key: "footer.ctaTitle", label: "Footer headline", group: "Contact & footer", kind: "text", default: "Let’s make something worth celebrating." },
   { key: "footer.ctaButton", label: "Footer button text", group: "Contact & footer", kind: "text", default: "Let’s Plan Your Event" },
@@ -114,22 +153,47 @@ export const ORIGINAL_SERVICE_TITLES = [
   "Customized event support",
 ];
 
-export const MOBILE_BAR_SERVICE = "Mobile Bar Services";
+export const MOBILE_BAR_SERVICE = "Mobile Bartending & Bar Services";
 
-export const DEFAULT_SERVICES: ServiceItem[] = [
-  { title: "Event Planning & Coordination", description: "From the first idea to the final toast, we help shape the plan, the timeline and the details so you can enjoy the day.", details: "Planning support, vendor coordination and a clear timeline built around your priorities.", price: "", image: "/images/details.webp" },
-  { title: "Wedding & Day-of Coordination", description: "Be present for the moments that matter. We keep your people, vendors and timeline moving on the day.", details: "Wedding-day timelines, vendor check-ins, ceremony cues and calm support from start to finish.", price: "", image: "/images/celebration.webp" },
-  { title: MOBILE_BAR_SERVICE, description: "A welcoming, dry-hire mobile bar with professional bartenders, thoughtful drinks and something for every guest.", details: "Choose from the Compass Collections, or book on-site bartending for a bar you already have.", price: "", image: "/images/cocktails.webp" },
-  { title: "Wedding Officiant & Ceremonies", description: "A ceremony that sounds like the two of you, led with warmth for weddings, elopements and vow renewals.", details: "Ceremony planning, personalized vows support and an officiant on the day.", price: "", image: "/images/celebration.webp" },
-  { title: "Event Setup & Teardown", description: "Let the setting feel as considered as the occasion, then leave the packing down to us.", details: "Layout, décor placement, event details and a full teardown afterward.", price: "", image: "/images/details.webp" },
-  { title: "Event Staffing", description: "Friendly, professional hands for service, guest flow and everything in between.", details: "Servers, attendants and event support staff scaled to your guest count.", price: "", image: "/images/cocktails.webp" },
-  { title: "Grazing Tables & Charcuterie", description: "Generous, beautifully styled spreads that invite guests to linger and mingle.", details: "Grazing tables and charcuterie displays sized and styled for your gathering.", price: "", image: "/images/details.webp" },
-  { title: "Craft Fairs & Vendor Markets", description: "Bar service, setup and event support for markets, fairs and community gatherings.", details: "Support for vendor markets, pop-ups and community events, large or small.", price: "", image: "/images/celebration.webp" },
+/** Service titles from the Nov 2026 site; a saved site still using exactly these moves to the current list. */
+export const PREVIOUS_SERVICE_TITLES = [
+  "Event Planning & Coordination",
+  "Wedding & Day-of Coordination",
+  "Mobile Bar Services",
+  "Wedding Officiant & Ceremonies",
+  "Event Setup & Teardown",
+  "Event Staffing",
+  "Grazing Tables & Charcuterie",
+  "Craft Fairs & Vendor Markets",
 ];
 
-export const LEGACY_SERVICES = ["Event planning", "Planning + bar", ...ORIGINAL_SERVICE_TITLES];
+export const DEFAULT_SERVICES: ServiceItem[] = [
+  { title: MOBILE_BAR_SERVICE, description: "Professional bartending, curated cocktails, and seamless bar service for weddings, private events, and celebrations.", details: "", price: "", image: "/images/cocktails.webp" },
+  { title: "Wedding & Day-of Coordination", description: "Thoughtful planning and event day management so you can be fully present and enjoy your celebration.", details: "", price: "", image: "/images/wr/wedding-ceremony.webp" },
+  { title: "Private Event Planning", description: "From birthdays and anniversaries to corporate and milestone events, we help create gatherings that feel personal and unique.", details: "", price: "", image: "/images/wr/dessert-table.webp" },
+  { title: "Craft Fair & Community Events", description: "Vendor coordination, event logistics, and on-site support to bring people, businesses, and communities together.", details: "", price: "", image: "/images/wr/fair-hall.webp" },
+  { title: "Wedding Officiant Services", description: "Personalized, meaningful ceremonies that reflect your love story, whether traditional, intimate, or completely your own.", details: "", price: "", image: "/images/wr/wedding-couple-arch.webp" },
+  { title: "Event Decor & Rentals", description: "Curated decor pieces and rental items to add warmth, style, and personality to your celebration.", details: "", price: "", image: "/images/wr/balloon-door.webp" },
+  { title: "Event Setup & Teardown", description: "Let the setting feel as considered as the occasion, then leave the packing down to us.", details: "", price: "", image: "/images/wr/fair-hall-draped.webp" },
+  { title: "Event Staffing", description: "Friendly, professional hands for service, guest flow and everything in between.", details: "", price: "", image: "/images/details.webp" },
+  { title: "Grazing Tables & Charcuterie", description: "Generous, beautifully styled spreads that invite guests to linger and mingle.", details: "", price: "", image: "/images/celebration.webp" },
+];
+
+/** Button wording on each service card, from the owner's mockup; other services say "Inquire". */
+export const SERVICE_BUTTONS: Record<string, string> = {
+  [MOBILE_BAR_SERVICE]: "Explore bar services",
+  "Wedding & Day-of Coordination": "Explore coordination",
+  "Private Event Planning": "Plan your event",
+  "Craft Fair & Community Events": "Explore community events",
+  "Wedding Officiant Services": "Officiant services",
+  "Event Decor & Rentals": "Ask about rentals",
+};
+
+export const LEGACY_SERVICES = ["Event planning", "Planning + bar", ...ORIGINAL_SERVICE_TITLES, ...PREVIOUS_SERVICE_TITLES];
 
 export const PARTNER_OPTION = "Venue or vendor partnership";
+
+export const BUDGET_RANGES = ["Under $1,000", "$1,000 to $2,500", "$2,500 to $5,000", "$5,000 to $10,000", "$10,000 or more", "Not sure yet"];
 
 export const EVENT_TYPES = [
   "Wedding",
@@ -164,3 +228,29 @@ export function readContent(content: Record<string, string>, key: string): strin
   if (Object.prototype.hasOwnProperty.call(content, key)) return content[key];
   return CONTENT_FIELDS.find((field) => field.key === key)?.default ?? "";
 }
+
+/** Photos from Wander & Revel's own events, shown in the gallery in this order. */
+const PHOTO = (id: string, title: string, category: Highlight["category"], description: string): Highlight =>
+  ({ id: `wr-${id}`, title, category, description, image: `/images/wr/${id}.webp`, guests: 0, inspiration: false });
+
+export const DEFAULT_HIGHLIGHTS: Highlight[] = [
+  PHOTO("wedding-couple-arch", "A destination wedding", "Weddings", "The couple under the floral arch on the beach."),
+  PHOTO("wedding-ceremony", "The ceremony on the sand", "Weddings", "Guests gathered for vows by the water."),
+  PHOTO("wedding-couple-shore", "Just married", "Weddings", "A quiet moment at the shoreline."),
+  PHOTO("wedding-guests", "Everyone who traveled to celebrate", "Weddings", "The full wedding party and guests."),
+  PHOTO("fair-hall", "The Galentine’s Craft Fair", "Community Events", "Our annual public craft fair, going on seven years."),
+  PHOTO("balloon-door", "Balloon heart wall", "Decor & Rentals", "A heart balloon backdrop for photos."),
+  PHOTO("dessert-table", "Dessert display", "Decor & Rentals", "A styled dessert table."),
+  PHOTO("fair-florist", "Local florists", "Community Events", "Fresh bouquets from a fair vendor."),
+  PHOTO("photo-booth", "Photo booth backdrop", "Decor & Rentals", "A flower and heart photo booth."),
+  PHOTO("fair-hall-draped", "The vendor hall", "Community Events", "Draped ceilings and rows of makers."),
+  PHOTO("balloon-wall", "Valentine’s photo corner", "Decor & Rentals", "A balloon wall styled for the fair."),
+  PHOTO("fair-aisle", "Browsing the makers", "Community Events", "Shoppers along the vendor aisles."),
+  PHOTO("fair-apothecary", "Handmade goods", "Community Events", "A vendor’s bath and body table."),
+  PHOTO("fair-kids-booth", "Something for everyone", "Community Events", "Handmade kids’ sets and quilts."),
+  PHOTO("fair-aisle-candles", "Candles and keepsakes", "Community Events", "Vendor tables full of small gifts."),
+  PHOTO("fair-shoppers", "A full house", "Community Events", "Shoppers filling the hall."),
+  PHOTO("fair-blankets", "Cozy finds", "Community Events", "A vendor’s handmade blankets."),
+  PHOTO("fair-vendor", "Meet the makers", "Community Events", "A vendor at her booth."),
+  PHOTO("fair-beauty-booth", "Small businesses", "Community Events", "A local beauty vendor’s booth."),
+];

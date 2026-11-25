@@ -3,7 +3,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { getSqlite } from "../db";
 import { createDemoSeed } from "./demo-seed";
 import { createFoodMenuSeed, FOOD_CATEGORIES } from "./food-menu";
-import { CONTENT_FIELDS, DEFAULT_SERVICES, inquiryServiceOptions, LEGACY_SERVICES, ORIGINAL_SERVICE_TITLES, PARTNER_OPTION } from "./site-defaults";
+import { CONTENT_FIELDS, DEFAULT_HIGHLIGHTS, DEFAULT_SERVICES, inquiryServiceOptions, LEGACY_SERVICES, ORIGINAL_SERVICE_TITLES, PARTNER_OPTION, PREVIOUS_SERVICE_TITLES } from "./site-defaults";
 import {
   BAR_CATEGORIES,
   HIGHLIGHT_CATEGORIES,
@@ -37,6 +37,8 @@ const IMAGE_PATHS = [
   "/images/cocktails.webp",
   "/images/details.webp",
 ] as const;
+/** Wander & Revel event photos shipped with the site, in public/images/wr. */
+const SITE_PHOTO_PATH = /^\/images\/wr\/[a-z0-9-]+\.webp$/;
 const UPLOAD_PATH = /^\/api\/media\/[0-9a-f-]{36}\.(?:jpg|png|webp|gif)$/;
 const CLIENT_TIME_ZONE = "America/New_York";
 
@@ -135,7 +137,7 @@ function validId(value: unknown, label = "id"): string {
 
 export function validImage(value: unknown, allowEmpty = false): string {
   if (allowEmpty && (value === "" || value === undefined || value === null)) return "";
-  if (typeof value === "string" && (IMAGE_PATHS.includes(value as (typeof IMAGE_PATHS)[number]) || UPLOAD_PATH.test(value))) return value;
+  if (typeof value === "string" && (IMAGE_PATHS.includes(value as (typeof IMAGE_PATHS)[number]) || SITE_PHOTO_PATH.test(value) || UPLOAD_PATH.test(value))) return value;
   throw new ValidationError("image must be a supplied site image or an uploaded photo");
 }
 
@@ -168,7 +170,8 @@ export function validateInquiryInput(payload: Record<string, unknown>, serviceTi
   return {
     ...common,
     date,
-    time: validTime(payload.time, "time"),
+    // A start time is optional; without one the date alone is held for the conversation.
+    time: payload.time === undefined || payload.time === null || payload.time === "" ? "" : validTime(payload.time, "time"),
     guests: integerInRange(payload.guests, "guests", 1, 10000),
   };
 }
@@ -280,7 +283,7 @@ export function updateState(state: DemoState, request: DemoActionRequest): DemoS
         return { ...state, inquiries: [inquiry, ...state.inquiries] };
       }
       const busy = state.inquiries.some((inquiry) =>
-        inquiry.status !== "declined" && inquiry.date === input.date && inquiry.time === input.time,
+        inquiry.status !== "declined" && input.time !== "" && inquiry.date === input.date && inquiry.time === input.time,
       );
       if (busy) throw new ValidationError("That date and time are already booked");
       const id = crypto.randomUUID();
@@ -297,7 +300,7 @@ export function updateState(state: DemoState, request: DemoActionRequest): DemoS
           { id: crypto.randomUUID(), title: "Confirm event details with the host", done: false },
           { id: crypto.randomUUID(), title: "Prepare a service and setup plan", done: false },
         ],
-        timeline: [{ id: crypto.randomUUID(), time: input.time, title: "Event start" }],
+        timeline: input.time ? [{ id: crypto.randomUUID(), time: input.time, title: "Event start" }] : [],
         budgetItems: [],
         foods: [],
       };
@@ -316,7 +319,7 @@ export function updateState(state: DemoState, request: DemoActionRequest): DemoS
       const target = state.inquiries.find((item) => item.id === id);
       if (!target) throw new ValidationError("inquiry not found");
       if (status !== "declined" && state.inquiries.some((item) =>
-        item.id !== id && item.status !== "declined" && item.date === target.date && item.time === target.time,
+        item.id !== id && item.status !== "declined" && target.time !== "" && item.date === target.date && item.time === target.time,
       )) throw new ValidationError("That date and time are already booked");
       return { ...state, inquiries: state.inquiries.map((item) => item.id === id ? { ...item, status } : item) };
     }
@@ -415,9 +418,15 @@ function migrateHighlight(item: Highlight): Highlight {
 function migrateServices(value: unknown): ServiceItem[] {
   if (!Array.isArray(value)) return DEFAULT_SERVICES;
   const services = value as ServiceItem[];
-  const untouched = services.length === ORIGINAL_SERVICE_TITLES.length &&
-    services.every((service, index) => service.title === ORIGINAL_SERVICE_TITLES[index] && !service.price);
-  return untouched ? DEFAULT_SERVICES : services;
+  const matches = (titles: string[]) => services.length === titles.length &&
+    services.every((service, index) => service.title === titles[index] && !service.price);
+  return matches(ORIGINAL_SERVICE_TITLES) || matches(PREVIOUS_SERVICE_TITLES) ? DEFAULT_SERVICES : services;
+}
+
+/** A gallery still holding only the original sample photos shows Wander & Revel's own event photos instead. */
+function migrateHighlights(value: Highlight[]): Highlight[] {
+  const samplesOnly = value.every((item) => item.id.startsWith("highlight-demo-"));
+  return samplesOnly ? DEFAULT_HIGHLIGHTS : value.map(migrateHighlight);
 }
 
 function normalizeState(value: Record<string, unknown>): DemoState {
@@ -444,7 +453,7 @@ function normalizeState(value: Record<string, unknown>): DemoState {
     foodMenu,
     barMenu: Array.isArray(value.barMenu) ? value.barMenu as BarMenuItem[] : [],
     services: migrateServices(value.services),
-    highlights: (value.highlights as Highlight[]).map(migrateHighlight),
+    highlights: migrateHighlights(value.highlights as Highlight[]),
     content: isRecord(value.content) ? value.content as Record<string, string> : {},
     clients: Array.isArray(value.clients) ? (value.clients as Client[]).map((client) => ({ ...client, updates: client.updates ?? [] })) : [],
     payments: Array.isArray(value.payments) ? value.payments as Payment[] : [],
