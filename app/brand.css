@@ -509,7 +509,7 @@ html[data-theme="dark"] { --wr-olive: #3e4430; --wr-olive-dark: #2f3424; }
 /* Home */
 .wr-service-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
 .wr-strip-card { display: flex; flex-direction: column; gap: 14px; color: var(--ink); text-align: center; }
-.wr-strip-card img { width: 100%; aspect-ratio: 1.55; object-fit: cover; transition: transform .4s var(--ease-out); }
+.wr-strip-card img { width: 100%; aspect-ratio: 1.55; height: auto; object-fit: cover; transition: transform .4s var(--ease-out); }
 .wr-strip-card:hover img { transform: scale(1.03); }
 .wr-strip-card span { font-family: var(--wr-serif); font-size: 18px; line-height: 1.3; }
 .wr-home-services .wr-sprig.corner { left: -10px; bottom: 0; }
@@ -543,7 +543,7 @@ html[data-theme="dark"] { --wr-olive: #3e4430; --wr-olive-dark: #2f3424; }
 /* Services */
 .wr-service-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
 .wr-service-card { display: flex; flex-direction: column; background: var(--white); box-shadow: 0 2px 14px rgba(41, 42, 39, .07); }
-.wr-service-card img { width: 100%; aspect-ratio: 1.72; object-fit: cover; }
+.wr-service-card img { width: 100%; aspect-ratio: 1.72; height: auto; object-fit: cover; }
 .wr-service-card-body { display: flex; flex-direction: column; flex: 1; padding: 22px 22px 26px; }
 .wr-service-card-body h2 { font-family: var(--wr-serif); font-weight: 400; font-size: 23px; letter-spacing: -.01em; color: var(--heading); margin: 0 0 10px; }
 .wr-service-card-body p { font-family: var(--wr-serif); font-size: 16px; line-height: 1.6; color: var(--ink); margin: 0 0 18px; }
@@ -577,6 +577,7 @@ html[data-theme="dark"] { --wr-olive: #3e4430; --wr-olive-dark: #2f3424; }
 .wr-gallery-grid { columns: 3 240px; column-gap: 12px; }
 .wr-gallery-grid .wr-photo { width: 100%; margin: 0 0 12px; break-inside: avoid; }
 .wr-gallery-grid .wr-photo img { aspect-ratio: auto; height: auto; }
+.wr-gallery-grid.few { columns: 2; }
 .wr-empty { text-align: center; font-family: var(--wr-serif); color: var(--muted); }
 
 /* Inquiry */

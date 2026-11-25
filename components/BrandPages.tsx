@@ -232,7 +232,7 @@ export function BrandGallery({ book, site, photos, onOpen }: PageProps & PhotoPr
           {feature.credit && <><span className="wr-rule" aria-hidden="true" /><p className="wr-credit">{feature.credit}</p></>}
           <button className="wr-button" onClick={() => book(first)}>Plan your celebration</button>
         </aside>}
-        <div className="wr-gallery-grid">{list.map((item, i) => <button key={item.id} className="wr-photo" onClick={() => onOpen(list, i)} aria-label={`Enlarge photo: ${item.title}`}>
+        <div className={list.length <= 4 ? "wr-gallery-grid few" : "wr-gallery-grid"}>{list.map((item, i) => <button key={item.id} className="wr-photo" onClick={() => onOpen(list, i)} aria-label={`Enlarge photo: ${item.title}`}>
           <img src={item.image} alt={item.title} loading="lazy" />
           {item.inspiration !== false && <span className="inspiration-badge">Inspiration</span>}
         </button>)}</div>

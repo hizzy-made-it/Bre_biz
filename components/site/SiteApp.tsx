@@ -20,7 +20,7 @@ const safeLink=(value:string)=>/^https:\/\/[^\s"<>]+$/.test(value)?value:'';
 
 export default function SiteApp({initial}:{initial:PublicSite}){
  const [site,setSite]=useState<PublicSite>(initial);const [route,setRoute]=useState('home');const [mobile,setMobile]=useState(false);
- const [service,setService]=useState(initial.services[0]?.title??'');const [highlight,setHighlight]=useState<{list:Highlight[];index:number}|null>(null);const [servicesOpen,setServicesOpen]=useState(false);const [search,setSearch]=useState('');
+ const [service,setService]=useState('');const [highlight,setHighlight]=useState<{list:Highlight[];index:number}|null>(null);const [servicesOpen,setServicesOpen]=useState(false);const [search,setSearch]=useState('');
  useEffect(()=>{const sync=()=>{const hash=location.hash.slice(1)||'home';setRoute(hash==='highlights'?'gallery':hash==='book'||hash==='inquiry'?'inquire':hash==='food-menu'?'menu':hash);setMobile(false);setServicesOpen(false);window.scrollTo({top:0,behavior:'instant'})};sync();addEventListener('hashchange',sync);return()=>removeEventListener('hashchange',sync)},[]);
  const go=(r:string)=>{location.hash=r};const book=(s:string)=>{setService(s);go('inquire')};
  const c=(key:string)=>readContent(site.content,key);
